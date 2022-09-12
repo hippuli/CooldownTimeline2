@@ -9,10 +9,13 @@ function CDTL2:GetAllSpellData(class, race)
 	local d = {}
 	
 	for _, spell in pairs(private.GetRacialData()) do
-		if spell["race"] == race then
-			table.insert(d, spell)
-			--CDTL2:Print("    RACIAL ADDED: "..spell["id"].." - "..spell["name"].." - "..spell["rank"])
-		end
+		table.insert(d, spell)
+		--CDTL2:Print("    RACIAL ADDED: "..spell["id"].." - "..spell["name"].." - "..spell["rank"])
+	end
+	
+	for _, spell in pairs(private.GetOtherData()) do
+		table.insert(d, spell)
+		--CDTL2:Print("    RACIAL ADDED: "..spell["id"].." - "..spell["name"].." - "..spell["rank"])
 	end
 	
 	for _, spell in pairs(private.GetClassData(class)) do
@@ -47,7 +50,12 @@ function CDTL2:GetSpellData(id, name)
 end
 
 function CDTL2:ScanSpellData(class)
-	for _, spell in pairs(private.GetRacialData(race)) do
+	for _, spell in pairs(private.GetRacialData()) do
+		local baseCD, _ = GetSpellBaseCooldown(spell["id"])
+		CDTL2:Print(spell["id"]..",,"..tostring(baseCD))
+	end
+	
+	for _, spell in pairs(private.GetOtherData()) do
 		local baseCD, _ = GetSpellBaseCooldown(spell["id"])
 		CDTL2:Print(spell["id"]..",,"..tostring(baseCD))
 	end
@@ -82,6 +90,33 @@ end
 		highlight,
 	}
 	]]--
+
+-- UNCATAGORISED
+private.GetOtherData = function()
+	local _, _, _, tocversion = GetBuildInfo()
+	local d = {}
+	
+	-- CLASSIC
+	if tocversion < 20000 then
+		table.insert(d, { id = 818, name = "Basic Campfire", rank = "", bCD = 300000 } )
+		
+	-- TBC
+	elseif tocversion < 30000 then
+		table.insert(d, { id = 818, name = "Basic Campfire", rank = "", bCD = 300000 } )
+	
+	-- WOTLK
+	elseif tocversion < 40000 then
+		table.insert(d, { id = 818, name = "Basic Campfire", rank = "", bCD = 300000 } )
+		table.insert(d, { id = 55428, name = "Lifeblood", rank = "1", bCD = 180000 } )
+		table.insert(d, { id = 55480, name = "Lifeblood", rank = "2", bCD = 180000 } )
+		table.insert(d, { id = 55500, name = "Lifeblood", rank = "3", bCD = 180000 } )
+		table.insert(d, { id = 55501, name = "Lifeblood", rank = "4", bCD = 180000 } )
+		table.insert(d, { id = 55502, name = "Lifeblood", rank = "5", bCD = 180000 } )
+		table.insert(d, { id = 55503, name = "Lifeblood", rank = "6", bCD = 180000 } )
+	end
+		
+	return d
+end
 
 -- RACIALS
 private.GetRacialData = function()

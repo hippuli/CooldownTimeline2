@@ -147,6 +147,59 @@ function CDTL2:CheckEdgeCases(spellName)
 			end
 		end
 	end
+	
+	if spellName == "Shadowmeld" then
+		local s = CDTL2:GetSpellSettings("Shadowmeld", "spells")
+		if s then
+			if not s["ignored"] then
+				local ef = CDTL2:GetExistingCooldown("Shadowmeld", "spells")
+				if ef then
+					CDTL2:SendToLane(ef)
+					CDTL2:SendToBarFrame(ef)
+				else
+					if CDTL2.db.profile.global["spells"]["enabled"] then
+						CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+						
+						if CDTL2:IsUsedBy("spells", s["id"]) then
+							--CDTL2:Print("USEDBY MATCH: "..s["id"])
+						else
+							--CDTL2:Print("NEW USEDBY: "..s["id"])
+							CDTL2:AddUsedBy("spells", s["id"], CDTL2.player["guid"])
+						end
+					end
+				end
+			end
+		else
+			s = CDTL2:GetSpellData(0, "Shadowmeld")
+			if s then
+				s["icon"] = icon
+				s["lane"] = CDTL2.db.profile.global["spells"]["defaultLane"]
+				s["barFrame"] = CDTL2.db.profile.global["spells"]["defaultBar"]
+				s["readyFrame"] = CDTL2.db.profile.global["spells"]["defaultReady"]
+				s["enabled"] = CDTL2.db.profile.global["spells"]["showByDefault"]
+				s["highlight"] = false
+				s["pinned"] = false
+				s["usedBy"] = { CDTL2.player["guid"] }
+				
+				local link, _ = GetSpellLink(s["id"])
+				s["link"] = link
+				
+				if s["bCD"] / 1000 > 3 and s["bCD"] / 1000 < CDTL2.db.profile.global["spells"]["ignoreThreshold"] then
+					s["ignored"] = false
+				else
+					s["ignored"] = true
+				end
+				
+				table.insert(CDTL2.db.profile.tables["spells"], s)
+				
+				if not s["ignored"] then
+					if CDTL2.db.profile.global["spells"]["enabled"] then
+						CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+					end
+				end
+			end
+		end
+	end
 end
 
 function CDTL2:ConvertTime(raw, style)
@@ -570,7 +623,7 @@ end
 
 function CDTL2:ScanCurrentCooldowns(class, race)
 	local sd = CDTL2:GetAllSpellData(class, race)
-
+	
 	-- SPELLS
 	for _, spell in pairs(sd) do
 		local start, duration, enabled, _ = GetSpellCooldown(spell["id"])

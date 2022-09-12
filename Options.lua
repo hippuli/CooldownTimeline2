@@ -29,6 +29,13 @@ private.GetChangelog = function()
 	changeLog = changeLog.."  - Fixed an issue with icon stacking that caused icons to switch places in the stack rapidly - hopefully fixed, its tough to reproduce\n"
 	changeLog = changeLog.."  - Added support for runic power tracking/custom text\n"
 	changeLog = changeLog.."  - Updated custom text tag for short cooldown name to ignore brackets - eg.Faire Fire (Feral) is now FFF instead of FF(\n"
+	changeLog = changeLog.."\n"
+	changeLog = changeLog.."Changelog 1.3:\n\n"
+	changeLog = changeLog.."  - Fixed an issue with vertical bars that caused icons to rapidly move position when stacking\n"
+	changeLog = changeLog.."  - Reworked offensive target detection/updates to hopefully fix offensive buff/debuff issues\n"
+	changeLog = changeLog.."  - Added Shadowmeld to edge-case handling as it was not getting picked up by standard spell cast detection\n"
+	changeLog = changeLog.."  - Added the ability to clear settings for individual cooldowns (button is found in filters settings)\n"
+	changeLog = changeLog.."  - Added framework to add uncatagorised spell data (Lifeblood and Basic Campfire data added)\n"
 	
 	return changeLog
 end
@@ -1536,6 +1543,50 @@ private.GetFilterSet = function(t, o)
 					end,
 				fontSize = "medium",
 			},
+			spacer203 = {
+				name = "\n\n",
+				type = "description",
+				order = 203,
+			},
+			clearIndividualSetting = {
+				name = "Clear Individual Settings",
+				desc = function(info)
+						local s = ""
+						
+						if CDTL2.currentFilter[t] then
+							s = CDTL2.currentFilter[t]
+						end
+				
+						return "This will clear cooldown settings for "..s
+					end,
+				confirm = true,
+				order = 204,
+				type = "execute",
+				hidden = function(info)
+						return CDTL2.currentFilterHidden[t]
+					end,
+				func = function(info)
+						local s = ""
+						
+						if CDTL2.currentFilter[t] then
+							s = CDTL2.currentFilter[t]
+						end
+						
+						local index = nil
+						for k, spell in pairs(CDTL2.db.profile.tables[t]) do
+							if spell["name"] == s then
+								index = k
+							end
+						end
+						
+						if index then
+							table.remove(CDTL2.db.profile.tables[t], index)
+						end
+						
+						CDTL2.currentFilter[t] = ""
+						CDTL2.currentFilterHidden[t] = true
+					end,
+			},			
 			spacer300 = {
 				name = "\n\n",
 				type = "description",

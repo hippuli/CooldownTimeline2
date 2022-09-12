@@ -10,7 +10,7 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.2
+CDTL2.version = 1.3
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
 CDTL2.barFrames = {}
@@ -2270,12 +2270,11 @@ function CDTL2:COMBAT_LOG_EVENT_UNFILTERED()
 							CDTL2:SendToBarFrame(ef)
 							
 							ef.data["currentCD"] = ef.data["baseCD"]
+							ef.data["targetID"] = destGUID
+							ef.data["targetName"] = destName
 						else
 							local rcd = CDTL2:RecycleOffensiveCD()
 							if rcd then
-								CDTL2:SendToLane(rcd)
-								CDTL2:SendToBarFrame(rcd)
-								
 								rcd.data["id"] = s["id"]
 								rcd.data["name"] = s["name"]
 								rcd.data["rank"] = s["rank"]
@@ -2297,8 +2296,14 @@ function CDTL2:COMBAT_LOG_EVENT_UNFILTERED()
 								rcd.icon.rank = rcd.data["rank"]
 								rcd.icon.lane = rcd.data["lane"]
 								
-								CDTL2:RefreshBar(rcd)
-								CDTL2:RefreshIcon(rcd)
+								rcd.data["targetID"] = destGUID
+								rcd.data["targetName"] = destName
+								
+								CDTL2:SendToLane(rcd)
+								CDTL2:SendToBarFrame(rcd)
+								
+								--CDTL2:RefreshBar(rcd)
+								--CDTL2:RefreshIcon(rcd)
 							else
 								s["targetID"] = destGUID
 								s["targetName"] = destName
@@ -2336,11 +2341,11 @@ function CDTL2:COMBAT_LOG_EVENT_UNFILTERED()
 					s["link"] = link
 					
 					table.insert(CDTL2.db.profile.tables["offensives"], s)
-					
-					s["targetID"] = destGUID
-					s["targetName"] = destName
-					
+										
 					if CDTL2.db.profile.global["offensives"]["enabled"] then
+						s["targetID"] = destGUID
+						s["targetName"] = destName
+						
 						CDTL2:CreateCooldown(CDTL2:GetUID(),"offensives" , s)
 					end
 				end

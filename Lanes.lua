@@ -396,14 +396,22 @@ private.CalcStacking = function(f, s, validChildren, count)
 			local iconSize = s["icons"]["size"]
 			
 			table.sort(validChildren, function(a, b)
-				local aX, _ = a:GetCenter()
-				local bX, _ = b:GetCenter()
+				local aX, aY = a:GetCenter()
+				local bX, bY = b:GetCenter()
 				
-				if aX == bX then
-					return a.uid < b.uid
+				if s["vertical"] then
+					if aY == bY then
+						return a.uid < b.uid
+					end
+					
+					return aY < bY
+				else
+					if aX == bX then
+						return a.uid < b.uid
+					end
+				
+					return aX < bX
 				end
-				
-				return aX < bX
 			end)
 			
 			local indicies = {}
