@@ -10,7 +10,7 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.3
+CDTL2.version = 1.4
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
 CDTL2.barFrames = {}
@@ -45,6 +45,7 @@ local defaults = {
 			enableTooltip = false,
 			zoom = 1,
 			
+			detectSharedCD = false,
 			hideIgnored = true,
 			
 			notUsableTint = false,
@@ -127,6 +128,7 @@ local defaults = {
 				width = 400,
 				height = 44,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				iconOffset = 0,
 				
@@ -171,6 +173,8 @@ local defaults = {
 					size = 40,
 					hlStyle = "NONE",
 					timeFormat = "H:MM:SS.MS",
+					
+					alpha = 1,
 					
 					bgTexture = "CDTL2 Icon Shadow",
 					bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
@@ -477,6 +481,7 @@ local defaults = {
 				width = 400,
 				height = 5,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				iconOffset = 0,
 				
@@ -521,6 +526,8 @@ local defaults = {
 					size = 30,
 					hlStyle = "NONE",
 					timeFormat = "H:MM:SS.MS",
+					
+					alpha = 1,
 					
 					bgTexture = "CDTL2 Icon Shadow",
 					bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
@@ -824,6 +831,7 @@ local defaults = {
 				width = 400,
 				height = 5,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				iconOffset = 0,
 				
@@ -868,6 +876,8 @@ local defaults = {
 					size = 30,
 					hlStyle = "NONE",
 					timeFormat = "H:MM:SS.MS",
+					
+					alpha = 1,
 					
 					bgTexture = "CDTL2 Icon Shadow",
 					bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
@@ -1176,6 +1186,7 @@ local defaults = {
 				width = 180,
 				height = 25,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				transition = {
 					hideTransitioned = true,
@@ -1203,6 +1214,8 @@ local defaults = {
 				bar = {
 					iconEnabled = true,
 					iconPosition = "LEFT",
+					
+					alpha = 1,
 					
 					xPadding = 0,
 					yPadding = 0,
@@ -1285,6 +1298,7 @@ local defaults = {
 				width = 180,
 				height = 25,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				transition = {
 					hideTransitioned = true,
@@ -1312,6 +1326,8 @@ local defaults = {
 				bar = {
 					iconEnabled = true,
 					iconPosition = "LEFT",
+					
+					alpha = 1,
 					
 					xPadding = 0,
 					yPadding = 0,
@@ -1394,6 +1410,7 @@ local defaults = {
 				width = 180,
 				height = 25,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				transition = {
 					hideTransitioned = true,
@@ -1421,6 +1438,8 @@ local defaults = {
 				bar = {
 					iconEnabled = true,
 					iconPosition = "LEFT",
+					
+					alpha = 1,
 					
 					xPadding = 0,
 					yPadding = 0,
@@ -1509,6 +1528,7 @@ local defaults = {
 				posX = -300,
 				posY = -75,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				bgTexture = "CDTL2 Smooth",
 				bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
@@ -1523,6 +1543,8 @@ local defaults = {
 				
 				icons = {
 					size = 50,
+					
+					alpha = 1,
 					
 					xPadding = 0,
 					yPadding = 0,
@@ -1619,6 +1641,7 @@ local defaults = {
 				posX = 300,
 				posY = -75,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				bgTexture = "CDTL2 Smooth",
 				bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
@@ -1633,6 +1656,8 @@ local defaults = {
 				
 				icons = {
 					size = 50,
+					
+					alpha = 1,
 					
 					xPadding = 0,
 					yPadding = 0,
@@ -1729,6 +1754,7 @@ local defaults = {
 				posX = 0,
 				posY = 100,
 				relativeTo = "CENTER",
+				alpha = 1,
 				
 				bgTexture = "CDTL2 Smooth",
 				bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
@@ -1743,6 +1769,8 @@ local defaults = {
 				
 				icons = {
 					size = 50,
+					
+					alpha = 1,
 					
 					xPadding = 0,
 					yPadding = 0,
@@ -1898,6 +1926,8 @@ function CDTL2:OnEnable()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("UNIT_POWER_FREQUENT")
 	self:RegisterEvent("UNIT_POWER_UPDATE")
+	
+	self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 
 	CDTL2:CreateLanes()
 	CDTL2:CreateBarFrames()
@@ -1969,6 +1999,27 @@ private.CreateDebugFrame = function()
 	f.text:SetText("CDTL2: Debug Enabled")
 	f.text:SetPoint("TOP", 0, -5)
 	
+	f.t1 = f:CreateFontString(nil,"ARTWORK")
+	f.t1:SetFont(CDTL2.LSM:Fetch("font", "Fira Sans Condensed"), 12, "NONE")
+	f.t1:SetShadowColor( 0, 0, 0, 1 )
+	f.t1:SetShadowOffset(1.5, -1)
+	f.t1:SetText("Text 1")
+	f.t1:SetPoint("TOP", 0, -30)
+	
+	f.t2 = f:CreateFontString(nil,"ARTWORK")
+	f.t2:SetFont(CDTL2.LSM:Fetch("font", "Fira Sans Condensed"), 12, "NONE")
+	f.t2:SetShadowColor( 0, 0, 0, 1 )
+	f.t2:SetShadowOffset(1.5, -1)
+	f.t2:SetText("Text 2")
+	f.t2:SetPoint("TOP", 0, -60)
+	
+	f.t3 = f:CreateFontString(nil,"ARTWORK")
+	f.t3:SetFont(CDTL2.LSM:Fetch("font", "Fira Sans Condensed"), 12, "NONE")
+	f.t3:SetShadowColor( 0, 0, 0, 1 )
+	f.t3:SetShadowOffset(1.5, -1)
+	f.t3:SetText("Text 3")
+	f.t3:SetPoint("TOP", 0, -90)
+	
 	local b = CreateFrame("Button", frameName.."_B_Reload", f, "UIPanelButtonTemplate", BackdropTemplateMixin and "BackdropTemplate" or nil)
 	b:SetSize(80 ,25) -- width, height
 	b:SetText("Reload")
@@ -2030,6 +2081,13 @@ private.CreateDebugFrame = function()
 		s["usedBy"] = { CDTL2.player["guid"] }
 		
 		CDTL2:CreateCooldown(CDTL2:GetUID(),"test" , s)]]--
+	end)
+	
+	-- ON UPDATE
+	f:HookScript("OnUpdate", function(self, elapsed)
+		--self.t1:SetText("CDTL2_Lane_1: "..CDTL2_Lane_1.currentCount)
+		--self.t2:SetText("CDTL2_BarFrame_1: "..CDTL2_BarFrame_1.currentCount)
+		--self.t3:SetText("CDTL2_Ready_1: "..CDTL2_Ready_1.currentCount)
 	end)
 		
 	-- DRAG AND DROP MOVEMENT
@@ -2825,6 +2883,24 @@ function CDTL2:RUNE_POWER_UPDATE(...)
 			if rune.data["runeIndex"] == runeIndex then
 				rune.data["runeGraceTime"] = GetTime()
 			end
+		end
+	end
+end
+
+function CDTL2:ACTIVE_TALENT_GROUP_CHANGED()
+	if CDTL2.db.profile.global["debugMode"] then
+		CDTL2:Print("SPEC CHANGE")
+	end
+	
+	for _, cd in pairs(CDTL2.cooldowns) do		
+		if IsSpellKnown(cd.data["id"]) then			
+			local start, duration, enabled, _ = GetSpellCooldown(cd.data["id"])
+			if duration > 1.5 then
+				CDTL2:SendToLane(cd)
+				CDTL2:SendToBarFrame(cd)
+			end
+		else
+			cd.data["currentCD"] = 0
 		end
 	end
 end

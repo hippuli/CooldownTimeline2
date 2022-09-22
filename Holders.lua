@@ -67,6 +67,9 @@ end
 private.CreateHolder = function(d)
 	local f = CreateFrame("Frame", d["fName"], UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	
+	f.currentCount = 0
+	f.previousCount = 0
+	
 	f.type = d["type"]
 	f:SetPoint("CENTER", UIParent, d["anchor"], d["posX"], d["posY"])
 	f:SetSize(d["sizeX"], d["sizeY"])
@@ -76,9 +79,7 @@ private.CreateHolder = function(d)
 	f.bg:SetColorTexture( 0.1, 0.1, 0.1, 0.5 )
 	
 	f:HookScript("OnUpdate", function(self,elapsed)
-		if CDTL2.db.profile.global["debugMode"] then
-			private.HolderUpdate(f, elapsed)
-		end
+		private.HolderUpdate(f, elapsed)
 	end)
 		
 	f.text = f:CreateFontString(nil,"ARTWORK")
@@ -89,28 +90,33 @@ private.CreateHolder = function(d)
 	f.text:SetPoint("CENTER", 0, 0)
 	
 	if not CDTL2.db.profile.global["debugMode"] then
-		f:SetAlpha(0)
+		--f:SetAlpha(0)
+		f:Hide()
+	else
+		f:Show()
 	end
 	
 	table.insert(CDTL2.holders, f)
 end
 
 private.HolderUpdate = function(f, elapsed)
-	local s = CDTL2.db.profile.holders
-	local children = { f:GetChildren() }
-	local validChildren = {}
-	
-	local count = 0
-	for _, child in ipairs(children) do
-		if child.valid then
-			count = count + 1
-			table.insert(validChildren, child)
+	if CDTL2.db.profile.global["debugMode"] then
+		local s = CDTL2.db.profile.holders
+		local children = { f:GetChildren() }
+		local validChildren = {}
+		
+		--local count = 0
+		for _, child in ipairs(children) do
+			if child.valid then
+				--count = count + 1
+				table.insert(validChildren, child)
+			end
 		end
-	end
-	
-	for k, child in ipairs(validChildren) do
-		local yOffset = (k - 1) * child:GetHeight() + (k - 1 * 5) + child:GetHeight()
-		child:ClearAllPoints()
-		child:SetPoint("CENTER", 0, -yOffset)
+		
+		for k, child in ipairs(validChildren) do
+			local yOffset = (k - 1) * child:GetHeight() + (k - 1 * 5) + child:GetHeight()
+			child:ClearAllPoints()
+			child:SetPoint("CENTER", 0, -yOffset)
+		end
 	end
 end

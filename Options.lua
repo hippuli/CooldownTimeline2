@@ -36,6 +36,12 @@ private.GetChangelog = function()
 	changeLog = changeLog.."  - Added Shadowmeld to edge-case handling as it was not getting picked up by standard spell cast detection\n"
 	changeLog = changeLog.."  - Added the ability to clear settings for individual cooldowns (button is found in filters settings)\n"
 	changeLog = changeLog.."  - Added framework to add uncatagorised spell data (Lifeblood and Basic Campfire data added)\n"
+	changeLog = changeLog.."Changelog 1.4:\n\n"
+	changeLog = changeLog.."  - Fixed an issue that caused icons/bars to freeze when changing spec\n"
+	changeLog = changeLog.."  - Applied multiple performance upgrades (this is a work in progress, more to come)\n"
+	changeLog = changeLog.."  - Added the option to set icon transparency value in lanes/ready\n"
+	changeLog = changeLog.."  - Added the option to set an overall transparency for each lane\n"
+	changeLog = changeLog.."  - Added the option to attempt detection of shared cooldowns for spells\n"
 	
 	return changeLog
 end
@@ -89,6 +95,19 @@ function CDTL2:GetMainOptions()
 							end,
 						set = function(info, val)
 								CDTL2.db.profile.global["enableTooltip"] = val
+							end,
+					},
+					detectSharedCD = {
+						name = "Detect Shared Spell Cooldowns",
+						desc = "If selected the mod will attempt to dectect other spells that share a cooldown as the initially cast spell and generate icons/bars for them",
+						order = 400,
+						type = "toggle",
+						width = "full",
+						get = function(info, index)
+								return CDTL2.db.profile.global["detectSharedCD"]
+							end,
+						set = function(info, val)
+								CDTL2.db.profile.global["detectSharedCD"] = val
 							end,
 					},
 					spacer500 = {
@@ -378,7 +397,6 @@ function CDTL2:GetFilterOptions()
 								CDTL2.db.profile.global[string.lower(default)]["ignoreThreshold"] = val
 								
 								for _, spell in pairs(CDTL2.cooldowns) do
-									CDTL2:Print("COOLDOWNS: "..spell.data["name"])
 									if spell.data["type"] == string.lower(default) then
 										if spell.data["baseCD"] / 1000 > val then
 											CDTL2:SendToHolding(spell)
@@ -391,7 +409,6 @@ function CDTL2:GetFilterOptions()
 								end
 								
 								for _, spell in pairs(CDTL2.db.profile.tables[string.lower(default)]) do
-									CDTL2:Print("SPELLDATA: "..spell["name"])
 									if spell["bCD"] / 1000 > 3 and spell["bCD"] / 1000 <= val then
 										spell["ignored"] = false
 									else
@@ -1452,7 +1469,7 @@ private.GetFilterSet = function(t, o)
 		order = o,
 		args = {
 			spacer100 = {
-				name = "\n\nSelect a cooldownto edit its settings\n",
+				name = "\n\nSelect a cooldown to edit its settings\n",
 				type = "description",
 				order = 100,
 			},
@@ -2822,6 +2839,26 @@ private.GetLaneSet = function(i)
 								CDTL2:RefreshLane(i)
 							end,
 					},
+					spacer603 = {
+						name = "",
+						type = "description",
+						order = 603,
+					},
+					laneAlpha = {
+						name = "Lane Alpha",
+						desc = "Set the alpha for the lane (this will reset custom text alpha settings, but they can be adjusted again after setting this)",
+						order = 604,
+						type = "range",
+						min = 0,
+						max = 1,
+						get = function(info, index)
+								return lane["alpha"]
+							end,
+						set = function(info, val)
+								lane["alpha"] = val
+								CDTL2:RefreshLane(i)
+						end,
+					},
 					spacer700 = {
 						name = "\n\n",
 						type = "description",
@@ -2912,6 +2949,27 @@ private.GetLaneSet = function(i)
 							end,
 						set = function(info, val)
 								lane["icons"]["size"] = val
+								CDTL2:RefreshAllIcons()
+						end,
+					},
+					spacer102 = {
+						name = "\n",
+						type = "description",
+						order = 102,
+					},
+					iconAlpha = {
+						name = "Icon Transparency",
+						desc = "Set the alpha for the icon (text alpha is set in text settings)",
+						order = 103,
+						type = "range",
+						min = 0,
+						max = 1,
+						get = function(info, index)
+								return lane["icons"]["alpha"]
+							end,
+						set = function(info, val)
+								lane["icons"]["alpha"] = val
+								
 								CDTL2:RefreshAllIcons()
 						end,
 					},
@@ -3993,9 +4051,30 @@ private.GetReadySet = function(i)
 						end,
 					},
 					spacer102 = {
-						name = "\n\n",
+						name = "\n",
 						type = "description",
 						order = 102,
+					},
+					iconAlpha = {
+						name = "Icon Transparency",
+						desc = "Set the alpha for the icon (text alpha is set in text settings)",
+						order = 103,
+						type = "range",
+						min = 0,
+						max = 1,
+						get = function(info, index)
+								return ready["icons"]["alpha"]
+							end,
+						set = function(info, val)
+								ready["icons"]["alpha"] = val
+								
+								CDTL2:RefreshAllIcons()
+						end,
+					},
+					spacer104 = {
+						name = "\n\n",
+						type = "description",
+						order = 104,
 					},
 					textHeader = {
 						name = "Icon Text",

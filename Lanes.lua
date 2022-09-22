@@ -4,6 +4,8 @@
 ]]--
 
 local private = {}
+private.updatePollRate = 2
+private.autohidePollRate = 5
 
 function CDTL2:CreateLanes()
 	local lane1Enabled = CDTL2.db.profile.lanes["lane1"]["enabled"]
@@ -114,7 +116,8 @@ function CDTL2:RefreshLane(i)
 	f.animateIn:SetToFinalAlpha(true)
 	local fadeIn = f.animateIn:CreateAnimation("Alpha")
 	fadeIn:SetFromAlpha(0)
-	fadeIn:SetToAlpha(1)
+	--fadeIn:SetToAlpha(1)
+	fadeIn:SetToAlpha(s["alpha"])
 	fadeIn:SetDuration(0.3)
 	fadeIn:SetSmoothing("OUT")
 	fadeIn:SetOrder(1)
@@ -123,7 +126,8 @@ function CDTL2:RefreshLane(i)
 	f.animateOut:SetLooping("NONE")
 	f.animateOut:SetToFinalAlpha(true)
 	local fadeOut = f.animateOut:CreateAnimation("Alpha")
-	fadeOut:SetFromAlpha(1)
+	fadeOut:SetFromAlpha(s["alpha"])
+	--fadeOut:SetFromAlpha(1)
 	fadeOut:SetToAlpha(0)
 	fadeOut:SetDuration(0.3)
 	fadeOut:SetSmoothing("OUT")
@@ -143,6 +147,8 @@ function CDTL2:RefreshLane(i)
 		CDTL2.colors["db"]["b"],
 		CDTL2.colors["db"]["a"]
 	)
+	
+	--f:SetAlpha(s["alpha"])
 	
 	if CDTL2.db.profile.global["unlockFrames"] then
 		CDTL2:FrameUnlock(f)
@@ -712,8 +718,12 @@ private.CreateLane = function(laneNumber)
 	local f = CreateFrame("StatusBar", frameName, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	
 	f.number = laneNumber
+	f.updateCount = 0
 	f.childCount = 0
 	f.overrideAutohide = false
+	
+	f.currentCount = 0
+	f.previousCount = 0
 
 	f.bg = f:CreateTexture(nil, "BACKGROUND")
 	f.st = CreateFrame("Frame", frameName.."_ST", f, BackdropTemplateMixin and "BackdropTemplate" or nil)
@@ -766,20 +776,28 @@ private.LaneUpdate = function(f, elapsed)
 	
 	f.forceShow = false
 	
-	local children = { f:GetChildren() }
-	local validChildren = {}
-	
-	local count = 0
-	for _, child in ipairs(children) do
-		if child.valid then
-			count = count + 1
-			table.insert(validChildren, child)
-		end
-	end
+	-- UPDATE
+	if f.updateCount % private.updatePollRate == 0 then
+		local children = { f:GetChildren() }
+		local validChildren = {}
 		
-	private.CalcStacking(f, s, validChildren, count)
-	
-	private.UpdateText(f, s)
+		local count = 0
+		for _, child in ipairs(children) do
+			if child.valid then
+				count = count + 1
+				table.insert(validChildren, child)
+			end
+		end
+		
+		if count ~= 0 then
+			if f.updateCount % 5 == 0 then
+				private.CalcStacking(f, s, validChildren, count)
+				private.UpdateText(f, s)
+			end
+		end
+		
+		f.childCount = count
+	end
 	
 	-- PRIMARY TRACKING
 	if s["tracking"]["primaryTracking"] ~= "NONE" then
@@ -805,12 +823,15 @@ private.LaneUpdate = function(f, elapsed)
 			end
 			f.st:SetPoint(anchor, tPosition, 0)
 			
-			f.st:SetAlpha(1)
+			--f.st:SetAlpha(1)
+			f.st:Show()
 		else
-			f.st:SetAlpha(0)
+			--f.st:SetAlpha(0)
+			f.st:Hide()
 		end
 	else
-		f.st:SetAlpha(0)
+		--f.st:SetAlpha(0)
+		f.st:Hide()
 	end
 
 	-- FRAME (UN)LOCKING
@@ -822,12 +843,19 @@ private.LaneUpdate = function(f, elapsed)
 		s["posY"] = yOfs
 	end
 	
-	f.childCount = count
+	-- AUTOHIDE
+	if f.updateCount % private.autohidePollRate == 0 then
+		if s["enabled"] then
+			CDTL2:Autohide(f, s)
+		else
+			f:SetAlpha(0)
+		end
+	end
 	
-	if s["enabled"] then
-		CDTL2:Autohide(f)
-	else
-		f:SetAlpha(0)
+	-- UPDATE COUNT
+	f.updateCount = f.updateCount + 1
+	if f.updateCount > 12000 then
+		f.updateCount = 1
 	end
 end
 

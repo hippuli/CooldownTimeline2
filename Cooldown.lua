@@ -322,6 +322,8 @@ function CDTL2:RefreshBar(cd)
 	
 	f.txt:SetFrameLevel(f.bar.ti:GetFrameLevel() + 1)
 	
+	--private.CalcTransitionIndicator(f, s)
+	
 	-- BORDER
 	CDTL2:SetBorder(f.bd, s["bar"]["border"])
 	f.bd:SetFrameLevel(f:GetFrameLevel() + 1)
@@ -377,6 +379,7 @@ function CDTL2:RefreshIcon(cd)
 	-- Set the icon texture
 	f.tx:SetAllPoints()
 	f.tx:SetTexture(cd.data["icon"])
+	f.tx:SetAlpha(s["icons"]["alpha"])
 	
 	-- Set the icon texture zoom
 	local zoom = CDTL2.db.profile.global["zoom"]
@@ -629,13 +632,17 @@ private.BarUpdate = function(f, elapsed)
 			local iconPercent = private.CalcLinearPosition(pCurrent, pBase)
 			ba.bar:SetValue(iconPercent)
 			
-			ba.txt.text1:SetText(CDTL2:ConvertTextTags(s["bar"]["text1"]["text"], f))
-			ba.txt.text2:SetText(CDTL2:ConvertTextTags(s["bar"]["text2"]["text"], f))
-			ba.txt.text3:SetText(CDTL2:ConvertTextTags(s["bar"]["text3"]["text"], f))
+			if d["updateCount"] % 3 == 0 then
+				ba.txt.text1:SetText(CDTL2:ConvertTextTags(s["bar"]["text1"]["text"], f))
+				ba.txt.text2:SetText(CDTL2:ConvertTextTags(s["bar"]["text2"]["text"], f))
+				ba.txt.text3:SetText(CDTL2:ConvertTextTags(s["bar"]["text3"]["text"], f))
+				private.CalcTransitionIndicator(f, s)
+			end
 			
 			-- TRANSITION TO LANE
-			private.CalcTransitionIndicator(f, s)
+			--private.CalcTransitionIndicator(f, s)
 		else
+			ba:GetParent():GetParent().currentCount = ba:GetParent():GetParent().currentCount - 1
 			CDTL2:SendToBarHolding(f)
 		end
 	end
@@ -842,7 +849,7 @@ private.CooldownUpdate = function(f, elapsed)
 	local ba = f.bar
 	
 	-- SPELLS
-	if d["type"] == "spells" or d["type"] == "petspells" then
+	if d["type"] == "spells" or d["type"] == "petspells" then	
 		if d["oaf"] then
 			if CDTL2:AuraExists("player", d["name"]) or UnitChannelInfo("player") then
 				--if d["updateCount"] % 50 == 0 then
@@ -873,6 +880,10 @@ private.CooldownUpdate = function(f, elapsed)
 				if d["updateCount"] == 0 or d["updateCount"] % 50 == 0 then
 					local start, duration, enabled, _ = GetSpellCooldown(d["id"])
 					d["currentCD"] = start + duration - GetTime()
+					
+					if d["updateCount"] == 0 and CDTL2.db.profile.global["detectSharedCD"] then
+						CDTL2:ScanSharedSpellCooldown(d["name"], d["currentCD"])
+					end
 				end
 			end
 		end
@@ -1073,9 +1084,11 @@ private.IconUpdate = function(f, elapsed)
 				ic:SetPoint(anchor, iconPosition, ic.yOffset + ic.sOffset)
 			end
 			
-			ic.txt.text1:SetText(CDTL2:ConvertTextTags(s["icons"]["text1"]["text"], f))
-			ic.txt.text2:SetText(CDTL2:ConvertTextTags(s["icons"]["text2"]["text"], f))
-			ic.txt.text3:SetText(CDTL2:ConvertTextTags(s["icons"]["text3"]["text"], f))
+			if d["updateCount"] % 3 == 0 then
+				ic.txt.text1:SetText(CDTL2:ConvertTextTags(s["icons"]["text1"]["text"], f))
+				ic.txt.text2:SetText(CDTL2:ConvertTextTags(s["icons"]["text2"]["text"], f))
+				ic.txt.text3:SetText(CDTL2:ConvertTextTags(s["icons"]["text3"]["text"], f))
+			end
 			
 			if CDTL2.db.profile.global["enableTooltip"] then	
 				if ic:IsMouseOver() then	
@@ -1104,6 +1117,7 @@ private.IconUpdate = function(f, elapsed)
 			elseif d["type"] == "test" then
 				
 			else
+				ic:GetParent().currentCount = ic:GetParent().currentCount - 1
 				CDTL2:SendToReady(f)
 			end
 		end
@@ -1127,6 +1141,7 @@ private.IconUpdate = function(f, elapsed)
 				end
 			end
 		else
+			ic:GetParent():GetParent().currentCount = ic:GetParent():GetParent().currentCount - 1
 			CDTL2:SendToHolding(f)
 		end
 	else
@@ -1161,18 +1176,21 @@ function CDTL2:SendToBarFrame(f)
 	if f.data["barFrame"] == 1 then
 		if CDTL2_BarFrame_1_MF then
 			ba:SetParent("CDTL2_BarFrame_1_MF")
+			CDTL2_BarFrame_1.currentCount = CDTL2_BarFrame_1.currentCount + 1			
 		else
 			CDTL2:SendToBarHolding(f)
 		end
 	elseif f.data["barFrame"] == 2 then
 		if CDTL2_BarFrame_2_MF then
 			ba:SetParent("CDTL2_BarFrame_2_MF")
+			CDTL2_BarFrame_2.currentCount = CDTL2_BarFrame_2.currentCount + 1
 		else
 			CDTL2:SendToBarHolding(f)
 		end
 	elseif f.data["barFrame"] == 3 then
 		if CDTL2_BarFrame_3_MF then
 			ba:SetParent("CDTL2_BarFrame_3_MF")
+			CDTL2_BarFrame_3.currentCount = CDTL2_BarFrame_3.currentCount + 1
 		else
 			CDTL2:SendToBarHolding(f)
 		end
@@ -1202,6 +1220,7 @@ function CDTL2:SendToHolding(f)
 		ic:SetParent("CDTL2_Offensive_Icon_Holding")
 	else
 		ic:SetParent("CDTL2_Active_Icon_Holding")
+		--ic:Hide()
 	end
 	
 	if GameTooltip:IsOwned(ic) then	
@@ -1216,19 +1235,26 @@ function CDTL2:SendToLane(f)
 	
 	if f.data["lane"] == 1 then
 		if CDTL2_Lane_1 then
+			--ic:GetParent().currentCount = ic:GetParent().currentCount - 1
+			--ic:Show()
 			ic:SetParent("CDTL2_Lane_1")
+			--CDTL2_Lane_1.currentCount = CDTL2_Lane_1.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end
 	elseif f.data["lane"] == 2 then
 		if CDTL2_Lane_2 then
+			--ic:GetParent().currentCount = ic:GetParent().currentCount - 1
 			ic:SetParent("CDTL2_Lane_2")
+			--CDTL2_Lane_2.currentCount = CDTL2_Lane_2.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end
 	elseif f.data["lane"] == 3 then
 		if CDTL2_Lane_3 then
+			--ic:GetParent().currentCount = ic:GetParent().currentCount - 1
 			ic:SetParent("CDTL2_Lane_3")
+			--CDTL2_Lane_3.currentCount = CDTL2_Lane_3.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end
@@ -1253,6 +1279,7 @@ function CDTL2:SendToReady(f)
 			ic.readyTime = s["nTime"]
 			PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
 			CDTL2_Ready_1.combatTimer = 0
+			CDTL2_Ready_1.currentCount = CDTL2_Ready_1.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end		
@@ -1263,6 +1290,7 @@ function CDTL2:SendToReady(f)
 			ic.readyTime = s["nTime"]
 			PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
 			CDTL2_Ready_2.combatTimer = 0
+			CDTL2_Ready_2.currentCount = CDTL2_Ready_2.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end
@@ -1273,6 +1301,7 @@ function CDTL2:SendToReady(f)
 			ic.readyTime = s["nTime"]
 			PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
 			CDTL2_Ready_3.combatTimer = 0
+			CDTL2_Ready_3.currentCount = CDTL2_Ready_3.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end

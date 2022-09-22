@@ -4,6 +4,8 @@
 ]]--
 
 local private = {}
+private.updatePollRate = 2
+private.autohidePollRate = 5
 
 function CDTL2:CreateBarFrames()
 	local frame1Enabled = CDTL2.db.profile.barFrames["frame1"]["enabled"]
@@ -135,14 +137,18 @@ private.CreateBarFrame = function(frameNumber)
 	local f = CreateFrame("Frame", frameName, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	
 	f.number = frameNumber
+	f.updateCount = 1
 	f.childCount = 0
 	f.overrideAutohide = false
-	
+		
 	f.mf = CreateFrame("Frame", frameName.."_MF", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	f.mf:SetParent(f)
 	f.mf.bg = f.mf:CreateTexture(nil, "BACKGROUND")
 	f.mf.bd = CreateFrame("Frame", frameName.."_BD", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	f.mf.bd:SetParent(f.mf)
+	
+	f.currentCount = 0
+	f.previousCount = 0
 
 	f.db = CreateFrame("Frame", frameName.."_DB", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	f.db:SetParent(f)
@@ -172,135 +178,140 @@ private.BarFrameUpdate = function(f, elapsed)
 	elseif f.number == 3 then
 		s = CDTL2.db.profile.barFrames["frame3"]
 	end
-	
+
 	f.forceShow = false
 	
-	local children = { f.mf:GetChildren() }
-	local validChildren = {}
-	
-	local count = 0
-	for _, child in ipairs(children) do
-		if child.valid then
-			if child:GetAlpha() ~= 0 then
-				count = count + 1
-				table.insert(validChildren, child)
+	-- UPDATE
+	if f.updateCount % private.updatePollRate == 0 then
+		local children = { f.mf:GetChildren() }
+		local validChildren = {}
+		
+		local count = 0
+		for _, child in ipairs(children) do
+			if child.valid then
+				if child:GetAlpha() ~= 0 then
+					count = count + 1
+					table.insert(validChildren, child)
+				end
 			end
 		end
-	end
-	
-	local bWidth = s["width"]
-	local bHeight = s["height"]
-	local bPadX = s["bar"]["xPadding"]
-	local bPadY = s["bar"]["yPadding"]
-	local fPad = s["padding"]
-	
-	local mfSizeX = bWidth + (fPad * 2)
-	local mfSizeY = bHeight + (fPad * 2)
-	local xInset = 0
-	local yInset = 0
-	local xOffset = 0
-	local yOffset = 0
-	local xMod = 0
-	local yMod = 0
-	local anchor = "TOP"
-	local mfAnchor = "CENTER"
-	
-	if count == 1 then
-		validChildren[1]:ClearAllPoints()	
-		validChildren[1]:SetPoint("CENTER", xOffset, yOffset)
-	elseif count > 1 then
+		
+		local bWidth = s["width"]
+		local bHeight = s["height"]
+		local bPadX = s["bar"]["xPadding"]
+		local bPadY = s["bar"]["yPadding"]
+		local fPad = s["padding"]
+		
+		local mfSizeX = bWidth + (fPad * 2)
+		local mfSizeY = bHeight + (fPad * 2)
+		local xInset = 0
+		local yInset = 0
+		local xOffset = 0
+		local yOffset = 0
+		local xMod = 0
+		local yMod = 0
 		local anchor = "TOP"
-		
-		if s["grow"] == "UP" then
-			mfAnchor = "BOTTOM"
-			anchor = "BOTTOM"
-			xInset = (-bPadX * (count - 1)) / 2
-			yInset = fPad
-			xMod = 0
-			yMod = 1
+		local mfAnchor = "CENTER"
+				
+		if count == 1 then
+			validChildren[1]:ClearAllPoints()	
+			validChildren[1]:SetPoint("CENTER", xOffset, yOffset)
+		elseif count > 1 then
+			local anchor = "TOP"
 			
-			mfSizeX = bWidth + (fPad * 2) + (math.abs(bPadX) * (count - 1))
-			mfSizeY = (bHeight * count) + (fPad * 2) + (bPadY * (count - 1))
-			yOffset = -fPad
-		
-		elseif s["grow"] == "DOWN" then
-			mfAnchor = "TOP"
-			anchor = "TOP"
-			xInset = (-bPadX * (count - 1)) / 2
-			yInset = -fPad
-			xMod = 0
-			yMod = -1
+			if s["grow"] == "UP" then
+				mfAnchor = "BOTTOM"
+				anchor = "BOTTOM"
+				xInset = (-bPadX * (count - 1)) / 2
+				yInset = fPad
+				xMod = 0
+				yMod = 1
+				
+				mfSizeX = bWidth + (fPad * 2) + (math.abs(bPadX) * (count - 1))
+				mfSizeY = (bHeight * count) + (fPad * 2) + (bPadY * (count - 1))
+				yOffset = -fPad
 			
-			mfSizeX = bWidth + (fPad * 2) + (math.abs(bPadX) * (count - 1))
-			mfSizeY = (bHeight * count) + (fPad * 2) + (-bPadY * (count - 1))
-			yOffset = fPad
-		
-		elseif s["grow"] == "LEFT" then
-			mfAnchor = "RIGHT"
-			anchor = "LEFT"
-			xInset = fPad
-			yInset = (-bPadY * (count - 1)) / 2
-			xMod = 1
-			yMod = 0
+			elseif s["grow"] == "DOWN" then
+				mfAnchor = "TOP"
+				anchor = "TOP"
+				xInset = (-bPadX * (count - 1)) / 2
+				yInset = -fPad
+				xMod = 0
+				yMod = -1
+				
+				mfSizeX = bWidth + (fPad * 2) + (math.abs(bPadX) * (count - 1))
+				mfSizeY = (bHeight * count) + (fPad * 2) + (-bPadY * (count - 1))
+				yOffset = fPad
 			
-			mfSizeX = (bWidth * count) + (fPad * 2) + (bPadX * (count - 1))
-			mfSizeY = bHeight + (fPad * 2) + (math.abs(bPadY) * (count - 1))
-			xOffset = fPad
-		
-		elseif s["grow"] == "RIGHT" then
-			mfAnchor = "LEFT"
-			anchor = "RIGHT"
-			xInset = -fPad
-			yInset = (-bPadY * (count - 1)) / 2
-			xMod = -1
-			yMod = 0
+			elseif s["grow"] == "LEFT" then
+				mfAnchor = "RIGHT"
+				anchor = "LEFT"
+				xInset = fPad
+				yInset = (-bPadY * (count - 1)) / 2
+				xMod = 1
+				yMod = 0
+				
+				mfSizeX = (bWidth * count) + (fPad * 2) + (bPadX * (count - 1))
+				mfSizeY = bHeight + (fPad * 2) + (math.abs(bPadY) * (count - 1))
+				xOffset = fPad
 			
-			mfSizeX = (bWidth * count) + (fPad * 2) + (-bPadX * (count - 1))
-			mfSizeY = bHeight + (fPad * 2) + (math.abs(bPadY) * (count - 1))
-			xOffset = -fPad
-		
-		elseif s["grow"] == "CENTER_V" then
-			mfAnchor = "CENTER"
-			anchor = "BOTTOM"
-			xInset = (-bPadX * (count - 1)) / 2
-			yInset = fPad
-			xMod = 0
-			yMod = 1
+			elseif s["grow"] == "RIGHT" then
+				mfAnchor = "LEFT"
+				anchor = "RIGHT"
+				xInset = -fPad
+				yInset = (-bPadY * (count - 1)) / 2
+				xMod = -1
+				yMod = 0
+				
+				mfSizeX = (bWidth * count) + (fPad * 2) + (-bPadX * (count - 1))
+				mfSizeY = bHeight + (fPad * 2) + (math.abs(bPadY) * (count - 1))
+				xOffset = -fPad
 			
-			mfSizeX = bWidth + (fPad * 2) + (math.abs(bPadX) * (count - 1))
-			mfSizeY = (bHeight * count) + (fPad * 2) + (bPadY * (count - 1))
-		
-		elseif s["grow"] == "CENTER_H" then
-			mfAnchor = "CENTER"
-			anchor = "LEFT"
-			xInset = fPad
-			yInset = (-bPadY * (count - 1)) / 2
-			xMod = 1
-			yMod = 0
+			elseif s["grow"] == "CENTER_V" then
+				mfAnchor = "CENTER"
+				anchor = "BOTTOM"
+				xInset = (-bPadX * (count - 1)) / 2
+				yInset = fPad
+				xMod = 0
+				yMod = 1
+				
+				mfSizeX = bWidth + (fPad * 2) + (math.abs(bPadX) * (count - 1))
+				mfSizeY = (bHeight * count) + (fPad * 2) + (bPadY * (count - 1))
 			
-			mfSizeX = (bWidth * count) + (fPad * 2) + (bPadX * (count - 1))
-			mfSizeY = bHeight + (fPad * 2) + (math.abs(bPadY) * (count - 1))
+			elseif s["grow"] == "CENTER_H" then
+				mfAnchor = "CENTER"
+				anchor = "LEFT"
+				xInset = fPad
+				yInset = (-bPadY * (count - 1)) / 2
+				xMod = 1
+				yMod = 0
+				
+				mfSizeX = (bWidth * count) + (fPad * 2) + (bPadX * (count - 1))
+				mfSizeY = bHeight + (fPad * 2) + (math.abs(bPadY) * (count - 1))
+				
+			end
 			
+			for k, child in ipairs(validChildren) do
+				local x = (bWidth * (k - 1) * xMod) + (bPadX * (k - 1))
+				local y = (bHeight * (k - 1) * yMod) + (bPadY * (k - 1))
+							
+				child:ClearAllPoints()		
+				child:SetPoint(anchor, x + xInset, y + yInset)
+			end
 		end
 		
-		for k, child in ipairs(validChildren) do
-			local x = (bWidth * (k - 1) * xMod) + (bPadX * (k - 1))
-			local y = (bHeight * (k - 1) * yMod) + (bPadY * (k - 1))
-						
-			child:ClearAllPoints()		
-			child:SetPoint(anchor, x + xInset, y + yInset)
-		end
+		f.mf:SetSize(mfSizeX, mfSizeY)
+		f.mf:ClearAllPoints()
+		f.mf:SetPoint(mfAnchor, xOffset, yOffset)
+		
+		f.childCount = count
 	end
-	
-	f.mf:SetSize(mfSizeX, mfSizeY)
-	f.mf:ClearAllPoints()
-	f.mf:SetPoint(mfAnchor, xOffset, yOffset)
 	
 	-- FRAME (UN)LOCKING
 	if CDTL2.db.profile.global["unlockFrames"] then
 		local _, _, relativeTo, xOfs, yOfs = f:GetPoint()
 		
-		if f.number == 1 then
+		--[[if f.number == 1 then
 			CDTL2.db.profile.barFrames["frame1"]["relativeTo"] = relativeTo
 			CDTL2.db.profile.barFrames["frame1"]["posX"] = xOfs -- xOffset
 			CDTL2.db.profile.barFrames["frame1"]["posY"] = yOfs -- yOffset
@@ -312,14 +323,27 @@ private.BarFrameUpdate = function(f, elapsed)
 			CDTL2.db.profile.barFrames["frame3"]["relativeTo"] = relativeTo
 			CDTL2.db.profile.barFrames["frame3"]["posX"] = xOfs -- xOffset
 			CDTL2.db.profile.barFrames["frame3"]["posY"] = yOfs -- yOffset
+		end]]---
+		
+		local _, _, relativeTo, xOfs, yOfs = f:GetPoint()
+		
+		s["relativeTo"] = relativeTo
+		s["posX"] = xOfs
+		s["posY"] = yOfs
+	end
+	
+	-- AUTOHIDE
+	if f.updateCount % private.autohidePollRate == 0 then
+		if s["enabled"] then
+			CDTL2:Autohide(f, s)
+		else
+			f:SetAlpha(0)
 		end
 	end
 	
-	f.childCount = count
-	
-	if s["enabled"] then
-		CDTL2:Autohide(f)
-	else
-		f:SetAlpha(0)
+	-- UPDATE COUNT
+	f.updateCount = f.updateCount + 1
+	if f.updateCount > 12000 then
+		f.updateCount = 1
 	end
 end

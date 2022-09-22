@@ -57,12 +57,21 @@ function CDTL2:AuraExists(unit, aura)
 	return nil
 end
 
-function CDTL2:Autohide(f)
+function CDTL2:Autohide(f, s)
+	local fAlpha = 1
+	if s then
+		fAlpha = s["alpha"]
+	end
+	
+	--CDTL2:Print(fAlpha)
+	
 	if CDTL2.db.profile.global["autohide"] and not CDTL2.db.profile.global["unlockFrames"] and not CDTL2.db.profile.global["debugMode"] then
 		if f.overrideAutohide then
-			f:SetAlpha(1)
+			--f:SetAlpha(1)
+			f:SetAlpha(fAlpha)
 		else
 			if f.childCount == 0 or f.forceHide then
+			--if f.currentCount == 0 or f.forceHide then
 				if f:GetAlpha() ~= 0 then
 					if f.animateOut then
 						if not f.animateOut:IsPlaying() then
@@ -73,7 +82,8 @@ function CDTL2:Autohide(f)
 					end
 				end
 			else
-				if f:GetAlpha() ~= 1 then
+				--if f:GetAlpha() ~= 1 then
+				if f:GetAlpha() ~= fAlpha then
 					--f:SetAlpha(1)
 					
 					if f.animateIn then
@@ -81,14 +91,17 @@ function CDTL2:Autohide(f)
 							f.animateIn:Play()
 						end
 					else
-						f:SetAlpha(1)
+						--f:SetAlpha(1)
+						f:SetAlpha(fAlpha)
 					end
 				end
 			end
 		end
 	else
-		if f:GetAlpha() ~= 1 then
-			f:SetAlpha(1)
+		--if f:GetAlpha() ~= 1 then
+		if f:GetAlpha() ~= fAlpha then
+			--f:SetAlpha(1)
+			f:SetAlpha(fAlpha)
 		end
 	end
 end
@@ -619,6 +632,68 @@ function CDTL2:RemoveHighlights(f, s)
 		0
 	)
 	f.hl.tx:SetColorTexture( 1, 1, 1, 0 )
+end
+
+function CDTL2:ScanSharedSpellCooldown(initialName, initialDuration)
+	local sd = CDTL2:GetAllSpellData(CDTL2.player["class"], CDTL2.player["race"])
+	
+	-- SPELLS
+	for _, spell in pairs(sd) do
+		if spell["name"] ~= initialName then
+			local start, duration, enabled, _ = GetSpellCooldown(spell["id"])
+			local difference = math.abs(initialDuration - duration)
+			
+			if difference < 0.2 then
+				if duration > 1.5 then
+					local ef = CDTL2:GetExistingCooldown(spell["name"], "spells")
+					if ef then
+						CDTL2:SendToLane(ef)
+						CDTL2:SendToBarFrame(ef)
+					else
+						local s = CDTL2:GetSpellSettings(spell["name"], "spells")
+						if s then
+							if not s["ignored"] then
+								CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+								
+								if not CDTL2:IsUsedBy("spells", spellID) then
+									CDTL2:AddUsedBy("spells", spellID, CDTL2.player["guid"])
+								end
+							end
+						else
+							local _, _, icon, _, _, _, _ = GetSpellInfo(spell["id"])
+							
+							local s = {
+								id = spell["id"],
+								bCD = duration,
+								name = spell["name"],
+								type = "spells",
+								icon = icon,
+								lane = CDTL2.db.profile.global["spells"]["defaultLane"],
+								barFrame = CDTL2.db.profile.global["spells"]["defaultBar"],
+								readyFrame = CDTL2.db.profile.global["spells"]["defaultReady"],
+								enabled = CDTL2.db.profile.global["spells"]["showByDefault"],
+								highlight = false,
+								pinned = false,
+								usedBy = { CDTL2.player["guid"] },
+							}
+							
+							if s["bCD"] / 1000 > 3 and s["bCD"] / 1000 < CDTL2.db.profile.global["spells"]["ignoreThreshold"] then
+								s["ignored"] = false
+							else
+								s["ignored"] = true
+							end
+							
+							table.insert(CDTL2.db.profile.tables["spells"], s)
+							
+							if not s["ignored"] then
+								CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 end
 
 function CDTL2:ScanCurrentCooldowns(class, race)
