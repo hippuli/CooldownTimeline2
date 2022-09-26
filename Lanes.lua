@@ -6,6 +6,9 @@
 local private = {}
 private.updatePollRate = 2
 private.autohidePollRate = 5
+private.stackingPollRate = 5
+private.dynamicTextPollRate = 10
+private.timeTextPollRate = 2
 
 function CDTL2:CreateLanes()
 	local lane1Enabled = CDTL2.db.profile.lanes["lane1"]["enabled"]
@@ -91,24 +94,49 @@ function CDTL2:RefreshLane(i)
 	)
 	
 	-- SECONDARY TRACKING
-	f.st:ClearAllPoints()
-	f.st:SetSize(s["tracking"]["stWidth"], s["tracking"]["stHeight"])
-	f.st.bg:SetTexture(CDTL2.LSM:Fetch("statusbar", s["tracking"]["stTexture"]))
-	f.st.bg:SetAllPoints(true)
-	f.st.bg:SetVertexColor(
-		s["tracking"]["stTextureColor"]["r"],
-		s["tracking"]["stTextureColor"]["g"],
-		s["tracking"]["stTextureColor"]["b"],
-		s["tracking"]["stTextureColor"]["a"]
-	)
+	if s["tracking"]["secondaryTracking"] ~= "None" then
+		if not f.bd then
+			f.st = CreateFrame("Frame", f:GetName().."_ST", f, BackdropTemplateMixin and "BackdropTemplate" or nil)
+			f.st:SetParent(f)
+			f.st.bg = f.st:CreateTexture(nil, "BACKGROUND")
+		end
+	
+		f.st:ClearAllPoints()
+		f.st:SetSize(s["tracking"]["stWidth"], s["tracking"]["stHeight"])
+		f.st.bg:SetTexture(CDTL2.LSM:Fetch("statusbar", s["tracking"]["stTexture"]))
+		f.st.bg:SetAllPoints(true)
+		f.st.bg:SetVertexColor(
+			s["tracking"]["stTextureColor"]["r"],
+			s["tracking"]["stTextureColor"]["g"],
+			s["tracking"]["stTextureColor"]["b"],
+			s["tracking"]["stTextureColor"]["a"]
+		)
+	else
+		if f.st then
+			f.st:Hide()
+		end
+	end
 	
 	-- BORDER
-	CDTL2:SetBorder(f.bd, s["border"])
-	f.bd:SetFrameLevel(f:GetFrameLevel() + 1)
+	if s["border"]["style"] ~= "None" then
+		if not f.bd then
+			f.bd = CreateFrame("Frame", f:GetName().."_BD", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+			f.bd:SetParent(f)
+		end
+	
+		CDTL2:SetBorder(f.bd, s["border"])
+		f.bd:Show()
+		f.bd:SetFrameLevel(f:GetFrameLevel() + 1)
+	else
+		if f.bd then
+			f.bd:Hide()
+		end
+	end
 	
 	-- TEXT
 	private.SetModeText(f, s)
 	private.RefreshText(f, s)
+	private.UpdateText(f, s)
 	
 	-- ANIMATION
 	f.animateIn = f:CreateAnimationGroup()
@@ -116,7 +144,6 @@ function CDTL2:RefreshLane(i)
 	f.animateIn:SetToFinalAlpha(true)
 	local fadeIn = f.animateIn:CreateAnimation("Alpha")
 	fadeIn:SetFromAlpha(0)
-	--fadeIn:SetToAlpha(1)
 	fadeIn:SetToAlpha(s["alpha"])
 	fadeIn:SetDuration(0.3)
 	fadeIn:SetSmoothing("OUT")
@@ -127,7 +154,6 @@ function CDTL2:RefreshLane(i)
 	f.animateOut:SetToFinalAlpha(true)
 	local fadeOut = f.animateOut:CreateAnimation("Alpha")
 	fadeOut:SetFromAlpha(s["alpha"])
-	--fadeOut:SetFromAlpha(1)
 	fadeOut:SetToAlpha(0)
 	fadeOut:SetDuration(0.3)
 	fadeOut:SetSmoothing("OUT")
@@ -148,7 +174,7 @@ function CDTL2:RefreshLane(i)
 		CDTL2.colors["db"]["a"]
 	)
 	
-	--f:SetAlpha(s["alpha"])
+	CDTL2:Autohide(f, s)
 	
 	if CDTL2.db.profile.global["unlockFrames"] then
 		CDTL2:FrameUnlock(f)
@@ -380,6 +406,8 @@ private.RefreshText = function(f, s)
 		tObject:SetNonSpaceWrap(false)
 		
 		tObject:SetText(CDTL2:ConvertTextTags(tSettings["text"], f))
+		tObject:SetText(CDTL2:ConvertTextDynamicTags(tSettings["text"], f))
+		tObject:SetText(CDTL2:ConvertTextTimeTags(tSettings["text"], f))
 		
 		if tSettings["enabled"] == true and tSettings["used"] == true then
 			tObject:SetAlpha(1)
@@ -389,7 +417,7 @@ private.RefreshText = function(f, s)
 	end
 end
 
-private.CalcStacking = function(f, s, validChildren, count)
+private.CalcStacking = function(f, s, count)
 	local baseLevel = 5
 	local levelMultiplier = 5
 
@@ -401,7 +429,7 @@ private.CalcStacking = function(f, s, validChildren, count)
 			local grow = s["stacking"]["grow"]
 			local iconSize = s["icons"]["size"]
 			
-			table.sort(validChildren, function(a, b)
+			table.sort(f.validChildren, function(a, b)
 				local aX, aY = a:GetCenter()
 				local bX, bY = b:GetCenter()
 				
@@ -423,13 +451,13 @@ private.CalcStacking = function(f, s, validChildren, count)
 			local indicies = {}
 			local currentIndex = 1
 			
-			for k, iconA in pairs(validChildren) do
+			for k, iconA in pairs(f.validChildren) do
 				if k == 1 then
 					table.insert(indicies, currentIndex)
 				end
 				
 				if k + 1 <= count then
-					local iconB = validChildren[k + 1]
+					local iconB = f.validChildren[k + 1]
 					local aX, aY = iconA:GetCenter()
 					local bX, bY = iconB:GetCenter()
 					
@@ -455,7 +483,7 @@ private.CalcStacking = function(f, s, validChildren, count)
 					for k, v in pairs(indicies) do
 						if v == i then
 							stackCount = stackCount + 1
-							table.insert(currentStack, validChildren[k])
+							table.insert(currentStack, f.validChildren[k])
 						end
 					end
 					
@@ -498,13 +526,17 @@ private.CalcStacking = function(f, s, validChildren, count)
 						local baseLevel = k * levelMultiplier
 						
 						icon:SetFrameLevel(baseLevel)
-						icon.bd:SetFrameLevel(baseLevel + 1)
-						icon.hl:SetFrameLevel(baseLevel + 2)
+						if icon.bd then
+							icon.bd:SetFrameLevel(baseLevel * k + 1)
+						end
+						if icon.hl then
+							icon.hl:SetFrameLevel(baseLevel * k + 2)
+						end
 					end
 				end
 			end
 		elseif style == "OFFSET" then
-			table.sort(validChildren, function(a, b)
+			table.sort(f.validChildren, function(a, b)
 				if a.currentCD == b.currentCD then
 					return a.uid < b.uid
 				end
@@ -516,7 +548,7 @@ private.CalcStacking = function(f, s, validChildren, count)
 			local height = s["stacking"]["height"]
 			local grow = s["stacking"]["grow"]
 			
-			for k, child in ipairs(validChildren) do
+			for k, child in ipairs(f.validChildren) do
 				local o = (offset * k) - offset
 				
 				if grow == "DOWN" then
@@ -528,33 +560,46 @@ private.CalcStacking = function(f, s, validChildren, count)
 				child.sOffset = o
 				
 				child:SetFrameLevel(baseLevel * k)
-				child.bd:SetFrameLevel(baseLevel * k + 1)
-				child.hl:SetFrameLevel(baseLevel * k + 2)
+				if child.bd then
+					child.bd:SetFrameLevel(baseLevel * k + 1)
+				end
+				if child.hl then
+					child.hl:SetFrameLevel(baseLevel * k + 2)
+				end
 			end
 			
 		elseif style == "STAGGERED" then
 			
 		else
-			table.sort(validChildren, function(a, b)
+			table.sort(f.validChildren, function(a, b)
 				if a.currentCD == b.currentCD then
 					return a.uid < b.uid
 				end
 				return a.currentCD > b.currentCD
 			end)
 		
-			for k, child in ipairs(validChildren) do
+			for k, child in ipairs(f.validChildren) do
 				child:SetFrameLevel(baseLevel * k)
-				child.bd:SetFrameLevel(baseLevel * k + 1)
-				child.hl:SetFrameLevel(baseLevel * k + 2)
+				if child.bd then
+					child.bd:SetFrameLevel(baseLevel * k + 1)
+				end
+				if child.hl then
+					child.hl:SetFrameLevel(baseLevel * k + 2)
+				end
 			end
 		end
 	else
-		for k, child in ipairs(validChildren) do
+		for k, child in ipairs(f.validChildren) do
 			child.stack = 1
 			child.sOffset = 0
 			child:SetFrameLevel(baseLevel * k)
-			child.bd:SetFrameLevel(baseLevel * k + 1)
-			child.hl:SetFrameLevel(baseLevel * k + 2)
+			
+			if child.bd then
+				child.bd:SetFrameLevel(baseLevel * k + 1)
+			end
+			if child.hl then
+				child.hl:SetFrameLevel(baseLevel * k + 2)
+			end
 		end
 	end
 end
@@ -676,7 +721,6 @@ private.CalcTracking = function(f, s, t, elapsed)
 			CDTL2.tracking["mhSwingTime"] = CDTL2.tracking["mhSwingTime"] - elapsed
 			
 			local percent = CDTL2.tracking["mhSwingTime"] / mhSpeed
-			--local reversePercent = math.abs(percent - 1)
 			
 			position = percent
 		end
@@ -690,7 +734,6 @@ private.CalcTracking = function(f, s, t, elapsed)
 			CDTL2.tracking["ohSwingTime"] = CDTL2.tracking["ohSwingTime"] - elapsed
 			
 			local percent = CDTL2.tracking["ohSwingTime"] / ohSpeed
-			--local reversePercent = math.abs(percent - 1)
 			
 			position = percent
 		end
@@ -704,7 +747,6 @@ private.CalcTracking = function(f, s, t, elapsed)
 			CDTL2.tracking["rSwingTime"] = CDTL2.tracking["rSwingTime"] - elapsed
 			
 			local percent = CDTL2.tracking["rSwingTime"] / rSwingTime
-			--local reversePercent = math.abs(percent - 1)
 			
 			position = percent
 		end
@@ -720,17 +762,21 @@ private.CreateLane = function(laneNumber)
 	f.number = laneNumber
 	f.updateCount = 0
 	f.childCount = 0
+	f.validChildren = {}
 	f.overrideAutohide = false
 	
 	f.currentCount = 0
 	f.previousCount = 0
+	f.triggerUpdate = false
 
 	f.bg = f:CreateTexture(nil, "BACKGROUND")
-	f.st = CreateFrame("Frame", frameName.."_ST", f, BackdropTemplateMixin and "BackdropTemplate" or nil)
-	f.st:SetParent(f)
-	f.st.bg = f.st:CreateTexture(nil, "BACKGROUND")
-	f.bd = CreateFrame("Frame", frameName.."_BD", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
-	f.bd:SetParent(f)
+	--f.st = CreateFrame("Frame", frameName.."_ST", f, BackdropTemplateMixin and "BackdropTemplate" or nil)
+	--f.st:SetParent(f)
+	--f.st.bg = f.st:CreateTexture(nil, "BACKGROUND")
+	
+	
+	--f.bd = CreateFrame("Frame", frameName.."_BD", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+	--f.bd:SetParent(f)
 	
 	f.db = CreateFrame("Frame", frameName.."_DB", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	f.db:SetParent(f)
@@ -777,78 +823,82 @@ private.LaneUpdate = function(f, elapsed)
 	f.forceShow = false
 	
 	-- UPDATE
-	if f.updateCount % private.updatePollRate == 0 then
+	if f.triggerUpdate then
 		local children = { f:GetChildren() }
-		local validChildren = {}
-		
+		f.validChildren = {}
 		local count = 0
 		for _, child in ipairs(children) do
 			if child.valid then
 				count = count + 1
-				table.insert(validChildren, child)
-			end
-		end
-		
-		if count ~= 0 then
-			if f.updateCount % 5 == 0 then
-				private.CalcStacking(f, s, validChildren, count)
-				private.UpdateText(f, s)
+				table.insert(f.validChildren, child)
 			end
 		end
 		
 		f.childCount = count
-	end
-	
-	-- PRIMARY TRACKING
-	if s["tracking"]["primaryTracking"] ~= "NONE" then
-		local tValue = private.CalcTracking(f, s, s["tracking"]["primaryTracking"], elapsed)
-		f:SetValue(tValue)
-	else
-		f:SetValue(1)
-	end
-	
-	-- SECONDARY TRACKING
-	if s["tracking"]["secondaryTracking"] ~= "NONE" then
-		local tValue = private.CalcTracking(f, s, s["tracking"]["secondaryTracking"], elapsed)
 		
-		if tValue < 1 and tValue > 0 then
-			local tPosition = (s["width"] - s["tracking"]["stWidth"]) * tValue
-			
-			f.st:ClearAllPoints()
-
-			local anchor = "LEFT"
-			if s["tracking"]["secondaryReversed"] then
-				anchor = "RIGHT"
-				tPosition = -tPosition
-			end
-			f.st:SetPoint(anchor, tPosition, 0)
-			
-			--f.st:SetAlpha(1)
-			f.st:Show()
-		else
-			--f.st:SetAlpha(0)
-			f.st:Hide()
-		end
-	else
-		--f.st:SetAlpha(0)
-		f.st:Hide()
-	end
-
-	-- FRAME (UN)LOCKING
-	if CDTL2.db.profile.global["unlockFrames"] then
-		local _, _, relativeTo, xOfs, yOfs = f:GetPoint()
-		
-		s["relativeTo"] = relativeTo
-		s["posX"] = xOfs
-		s["posY"] = yOfs
-	end
-	
-	-- AUTOHIDE
-	if f.updateCount % private.autohidePollRate == 0 then
 		if s["enabled"] then
 			CDTL2:Autohide(f, s)
 		else
 			f:SetAlpha(0)
+		end
+		
+		-- TEXT UPDATE
+		private.UpdateText(f, s)
+		
+		f.triggerUpdate = false
+	end
+	
+	-- TEXT UPDATE
+	--private.UpdateText(f, s)
+	
+	if f:GetAlpha() ~= 0 then
+		-- TEXT UPDATE
+		--private.UpdateText(f, s)
+	
+		-- STACKING CALC
+		if f.updateCount % private.stackingPollRate == 0 then
+			private.CalcStacking(f, s, f.childCount)
+		end
+	
+		-- PRIMARY TRACKING
+		if s["tracking"]["primaryTracking"] ~= "NONE" then
+			local tValue = private.CalcTracking(f, s, s["tracking"]["primaryTracking"], elapsed)
+			f:SetValue(tValue)
+		else
+			f:SetValue(1)
+		end
+		
+		-- SECONDARY TRACKING
+		if s["tracking"]["secondaryTracking"] ~= "NONE" then
+			local tValue = private.CalcTracking(f, s, s["tracking"]["secondaryTracking"], elapsed)
+			
+			if tValue < 1 and tValue > 0 then
+				local tPosition = (s["width"] - s["tracking"]["stWidth"]) * tValue
+				
+				f.st:ClearAllPoints()
+
+				local anchor = "LEFT"
+				if s["tracking"]["secondaryReversed"] then
+					anchor = "RIGHT"
+					tPosition = -tPosition
+				end
+				
+				f.st:SetPoint(anchor, tPosition, 0)
+				f.st:Show()
+			else
+				f.st:Hide()
+			end
+		else
+			f.st:Hide()
+		end
+		
+		-- FRAME (UN)LOCKING
+		if CDTL2.db.profile.global["unlockFrames"] then
+			local _, _, relativeTo, xOfs, yOfs = f:GetPoint()
+			
+			s["relativeTo"] = relativeTo
+			s["posX"] = xOfs
+			s["posY"] = yOfs
 		end
 	end
 	
@@ -964,11 +1014,11 @@ private.SetModeText = function(f, s)
 	end
 end
 
-private.UpdateText = function(f, s)
-	for i = 1, 10, 1 do
+private.UpdateModeText = function(f, s)
+	for i = 1, 5, 1 do
 		local tSettings = nil
 		local tObject = nil
-	   
+	
 		if i == 1 then
 			tSettings = s["modeText"]["text1"]
 			tObject = f.t1
@@ -984,23 +1034,46 @@ private.UpdateText = function(f, s)
 		elseif i == 5 then
 			tSettings = s["modeText"]["text5"]
 			tObject = f.t5
-		elseif i == 6 then
+		end
+		
+		tObject:SetText(CDTL2:ConvertTextTags(tSettings["text"], f))
+	end
+end 
+
+private.UpdateText = function(f, s)
+	for i = 1, 5, 1 do
+		local tSettings = nil
+		local tObject = nil
+		
+		if i == 1 then
 			tSettings = s["customText"]["text1"]
 			tObject = f.c1
-		elseif i == 7 then
+		elseif i == 2 then
 			tSettings = s["customText"]["text2"]
 			tObject = f.c2
-		elseif i == 8 then
+		elseif i == 3 then
 			tSettings = s["customText"]["text3"]
 			tObject = f.c3
-		elseif i == 9 then
+		elseif i == 4 then
 			tSettings = s["customText"]["text4"]
 			tObject = f.c4
-		elseif i == 10 then
+		elseif i == 5 then
 			tSettings = s["customText"]["text5"]
 			tObject = f.c5
 		end
 		
-		tObject:SetText(CDTL2:ConvertTextTags(tSettings["text"], f))
+		if tSettings["enabled"] then
+			if tSettings["dtags"] then
+				if f.updateCount % private.dynamicTextPollRate == 0 then
+					tObject:SetText(CDTL2:ConvertTextDynamicTags(tSettings["text"], f))
+				end
+			end
+			
+			if tSettings["ttags"] then
+				if f.updateCount % private.timeTextPollRate == 0 then
+					tObject:SetText(CDTL2:ConvertTextTimeTags(tSettings["text"], f))
+				end
+			end
+		end
 	end
 end

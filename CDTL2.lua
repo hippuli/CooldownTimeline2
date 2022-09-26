@@ -10,7 +10,8 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.4
+CDTL2.version = 1.5
+CDTL2.noticeVersion = 1.5
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
 CDTL2.barFrames = {}
@@ -204,6 +205,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = true,
+						ttags = false,
 						text = "[cd.stacks]",
 						font = "Fira Sans Condensed",
 						size = 11,
@@ -221,6 +224,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = true,
 						text = "[cd.time]",
 						font = "Fira Sans Condensed",
 						size = 16,
@@ -238,6 +243,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "",
 						font = "Fira Sans Condensed",
 						size = 11,
@@ -382,6 +389,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 1",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -400,6 +409,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 2",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -418,6 +429,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 3",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -436,6 +449,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 4",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -454,6 +469,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 5",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -557,6 +574,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = true,
+						ttags = false,
 						text = "[cd.stacks]",
 						font = "Fira Sans Condensed",
 						size = 10,
@@ -574,6 +593,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = true,
 						text = "[cd.time]",
 						font = "Fira Sans Condensed",
 						size = 13,
@@ -591,6 +612,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "",
 						font = "Fira Sans Condensed",
 						size = 10,
@@ -732,6 +755,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 1",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -750,6 +775,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 2",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -768,6 +795,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 3",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -786,6 +815,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 4",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -804,6 +835,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 5",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -907,6 +940,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = true,
+						ttags = false,
 						text = "[cd.stacks]",
 						font = "Fira Sans Condensed",
 						size = 10,
@@ -924,6 +959,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = true,
 						text = "[cd.time]",
 						font = "Fira Sans Condensed",
 						size = 13,
@@ -941,6 +978,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "",
 						font = "Fira Sans Condensed",
 						size = 10,
@@ -1082,6 +1121,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 1",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1100,6 +1141,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 2",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1118,6 +1161,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 3",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1136,6 +1181,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 4",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1154,6 +1201,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "Custom Text 5",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1237,6 +1286,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = true,
+						ttags = false,
 						text = "[cd.stacks]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1254,6 +1305,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.name]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1271,6 +1324,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = true,
 						text = "[cd.time]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1349,6 +1404,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = true,
+						ttags = false,
 						text = "[cd.stacks]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1366,6 +1423,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.name]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1383,6 +1442,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = true,
 						text = "[cd.time]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1461,6 +1522,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = true,
+						ttags = false,
 						text = "[cd.stacks]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1478,6 +1541,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.name]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1495,6 +1560,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = true,
 						text = "[cd.time]",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1577,6 +1644,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.name.s]",
 						font = "Fira Sans Condensed",
 						size = 18,
@@ -1594,6 +1663,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "READY",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1611,6 +1682,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.type]",
 						font = "Fira Sans Condensed",
 						size = 10,
@@ -1690,6 +1763,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.name.s]",
 						font = "Fira Sans Condensed",
 						size = 18,
@@ -1707,6 +1782,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "READY",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1724,6 +1801,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.type]",
 						font = "Fira Sans Condensed",
 						size = 10,
@@ -1803,6 +1882,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.name.s]",
 						font = "Fira Sans Condensed",
 						size = 18,
@@ -1820,6 +1901,8 @@ local defaults = {
 						enabled = true,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "READY",
 						font = "Fira Sans Condensed",
 						size = 12,
@@ -1837,6 +1920,8 @@ local defaults = {
 						enabled = false,
 						used = true,
 						edit = false,
+						dtags = false,
+						ttags = false,
 						text = "[cd.type]",
 						font = "Fira Sans Condensed",
 						size = 10,
@@ -1953,7 +2038,7 @@ function CDTL2:OnEnable()
 		end
 	end)
 	
-	if CDTL2.db.profile.global["firstRun"] then
+	if CDTL2.db.profile.global["firstRun"] or CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
 		C_Timer.After(10, function()
 			private.CreateFirstRunFrame()
 		end)
@@ -2107,17 +2192,50 @@ end
 private.CreateFirstRunFrame = function()
 	local f = CreateFrame("Frame", "CDTL2_First_Run", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	
-	local text = "\124cff00ccffWelcome to CDTL2\124r\n\n\n"
-			text = text.."This is a complete re-write of Cooldown Timeline\n"
-			text = text.."Access to the options panel is now via:\n\n"
-			text = text.."\124cffADFF2F/cdtl2\124r or \124cffADFF2F/cooldowntimeline2\124r\n\n"
-			text = text.."Due to the number of changes made, settings\nfrom Cooldown Timeline will not carry over to CDTL2\n\n"
-			text = text.."Old settings are still saved, and you can manually\ninstall old versions\n\n"
-			text = text.."Good luck, and have fun!\n"
+	local text = "\124cff00ccffWelcome to CDTL2\124r"
 	
+	if CDTL2.db.profile.global["previousVersion"] == 0 then
+		text = text.."\n\n\n"
+		text = text.."This is a complete re-write of Cooldown Timeline\n"
+		text = text.."Access to the options panel is now via:\n\n"
+		text = text.."\124cffADFF2F/cdtl2\124r or \124cffADFF2F/cooldowntimeline2\124r\n\n"
+		text = text.."Due to the number of changes made, settings\nfrom Cooldown Timeline will not carry over to CDTL2\n\n"
+		text = text.."Old settings are still saved, and you can manually\ninstall old versions"
+	end
+	
+	if CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
+		text = text.."\n\n\n"
+		text = text.."This latest version contains many changes\n"
+		text = text.."that should greatly improve performance.\n\n"
+		text = text.."Everything should function just as before,\n"
+		text = text.."but if you notice something isn't quite right,\n"
+		text = text.."please feel free to let me know via Curse"
+	end
+	
+	text = text.."\n\n"
+	text = text.."Good luck, and have fun!\n"
+	
+	-- TEXT
+	f.text = f:CreateFontString(nil,"ARTWORK")
+	f.text:SetFont(CDTL2.LSM:Fetch("font", "Fira Sans Condensed"), 12, "NONE")
+	f.text:SetShadowColor( 0, 0, 0, 1 )
+	f.text:SetShadowOffset(1.5, -1)
+	f.text:SetText(text)
+	f.text:SetNonSpaceWrap(true)
+	f.text:SetPoint("TOP", 0, -5)
+	
+	f.text1 = f:CreateFontString(nil,"ARTWORK")
+	f.text1:SetFont(CDTL2.LSM:Fetch("font", "Fira Sans Condensed"), 12, "NONE")
+	f.text1:SetShadowColor( 0, 0, 0, 1 )
+	f.text1:SetShadowOffset(1.5, -1)
+	f.text1:SetText("Show this message next login/reload?")
+	f.text1:SetPoint("BOTTOM", 0, 33)
+	
+	--local textHeight = f.text:GetStringHeight()
+	local textHeight = f.text:GetHeight()
 	f:ClearAllPoints()
 	f:SetPoint("TOP", 0, -200)
-	f:SetSize(300, 250)
+	f:SetSize(300, textHeight + 80)
 	f:SetFrameLevel(200)
 	
 	-- BACKGROUND
@@ -2142,21 +2260,7 @@ private.CreateFirstRunFrame = function()
 				})
 	f.bd:SetFrameLevel(f:GetFrameLevel() + 1)
 	
-	-- TEXT
-	f.text = f:CreateFontString(nil,"ARTWORK")
-	f.text:SetFont(CDTL2.LSM:Fetch("font", "Fira Sans Condensed"), 12, "NONE")
-	f.text:SetShadowColor( 0, 0, 0, 1 )
-	f.text:SetShadowOffset(1.5, -1)
-	f.text:SetText(text)
-	f.text:SetNonSpaceWrap(true)
-	f.text:SetPoint("TOP", 0, -5)
 	
-	f.text = f:CreateFontString(nil,"ARTWORK")
-	f.text:SetFont(CDTL2.LSM:Fetch("font", "Fira Sans Condensed"), 12, "NONE")
-	f.text:SetShadowColor( 0, 0, 0, 1 )
-	f.text:SetShadowOffset(1.5, -1)
-	f.text:SetText("Show this message next login/reload?")
-	f.text:SetPoint("BOTTOM", 0, 33)
 	
 	local b = CreateFrame("Button", "CDTL2_First_Run_Yes", f, "UIPanelButtonTemplate", BackdropTemplateMixin and "BackdropTemplate" or nil)
 	b:SetSize(80 ,25) -- width, height
@@ -2172,10 +2276,13 @@ private.CreateFirstRunFrame = function()
 	b:SetPoint("BOTTOM", 45, 4)
 	b:SetScript("OnClick", function()
 		CDTL2.db.profile.global["firstRun"] = false
+		CDTL2.db.profile.global["previousVersion"] = CDTL2.version
 		f:Hide()
 	end)
 	
-	CDTL2.unlockFrame = f
+	
+	
+	--CDTL2.unlockFrame = f
 end
 
 private.CreateUnlockFrame = function()

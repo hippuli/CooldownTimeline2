@@ -107,7 +107,7 @@ function CDTL2:Autohide(f, s)
 end
 
 function CDTL2:CheckEdgeCases(spellName)
-	-- Vanish should also spawn a Stealth icon/bar
+	-- VANISH SHOULD ALSO SPAWN A STEALTH ICON/BAR
 	if spellName == "Vanish" then
 		local s = CDTL2:GetSpellSettings("Stealth", "spells")
 		if s then
@@ -132,6 +132,8 @@ function CDTL2:CheckEdgeCases(spellName)
 		else
 			s = CDTL2:GetSpellData(0, "Stealth")
 			if s then
+				local _, _, icon, _, _, _, _ = GetSpellInfo(s["id"])
+				
 				s["icon"] = icon
 				s["lane"] = CDTL2.db.profile.global["spells"]["defaultLane"]
 				s["barFrame"] = CDTL2.db.profile.global["spells"]["defaultBar"]
@@ -161,6 +163,7 @@ function CDTL2:CheckEdgeCases(spellName)
 		end
 	end
 	
+	-- SHADOWMELD
 	if spellName == "Shadowmeld" then
 		local s = CDTL2:GetSpellSettings("Shadowmeld", "spells")
 		if s then
@@ -185,6 +188,8 @@ function CDTL2:CheckEdgeCases(spellName)
 		else
 			s = CDTL2:GetSpellData(0, "Shadowmeld")
 			if s then
+				local _, _, icon, _, _, _, _ = GetSpellInfo(s["id"])
+				
 				s["icon"] = icon
 				s["lane"] = CDTL2.db.profile.global["spells"]["defaultLane"]
 				s["barFrame"] = CDTL2.db.profile.global["spells"]["defaultBar"]
@@ -208,6 +213,180 @@ function CDTL2:CheckEdgeCases(spellName)
 				if not s["ignored"] then
 					if CDTL2.db.profile.global["spells"]["enabled"] then
 						CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+					end
+				end
+			end
+		end
+	end
+	
+	-- PALLY SPELL LOCKOUT: VARIOUS PROTECTIONS
+	if	spellName == "Divine Protection" or 
+		spellName == "Divine Shield" or 
+		spellName == "Hand of Protection" or 
+		spellName == "Lay on Hands" 
+	then
+		if CDTL2.db.profile.global["detectSharedCD"] then
+			for i = 1, 5, 1 do
+				local secondarySpellName = ""
+				if i == 1 then
+					secondarySpellName = "Divine Protection"
+					lockoutTime = 120
+				elseif i == 2 then
+					secondarySpellName = "Divine Shield"
+					lockoutTime = 120
+				elseif i == 3 then
+					secondarySpellName = "Hand of Protection"
+					lockoutTime = 120
+				elseif i == 4 then
+					secondarySpellName = "Lay on Hands"
+					lockoutTime = 120
+				elseif i == 5 then
+					secondarySpellName = "Avenging Wrath"
+					lockoutTime = 30
+				end
+				
+				if spellName ~= secondarySpellName then
+					local s = CDTL2:GetSpellSettings(secondarySpellName, "spells")
+					if s then
+						if not s["ignored"] then
+							local ef = CDTL2:GetExistingCooldown(secondarySpellName, "spells")
+							if ef then
+								if ef.data["currentCD"] < lockoutTime then
+									CDTL2:SendToLane(ef)
+									CDTL2:SendToBarFrame(ef)
+									
+									ef.data["currentCD"] = lockoutTime
+									ef.data["overrideCD"] = true
+								end
+							else
+								if CDTL2.db.profile.global["spells"]["enabled"] then
+									local f = CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+									f.data["currentCD"] = lockoutTime
+									f.data["overrideCD"] = true
+									
+									if CDTL2:IsUsedBy("spells", s["id"]) then
+										--CDTL2:Print("USEDBY MATCH: "..s["id"])
+									else
+										--CDTL2:Print("NEW USEDBY: "..s["id"])
+										CDTL2:AddUsedBy("spells", s["id"], CDTL2.player["guid"])
+									end
+								end
+							end
+						end
+					else
+						s = CDTL2:GetSpellData(0, secondarySpellName)
+						if s then
+							local _, _, icon, _, _, _, _ = GetSpellInfo(s["id"])
+							
+							s["icon"] = icon
+							s["lane"] = CDTL2.db.profile.global["spells"]["defaultLane"]
+							s["barFrame"] = CDTL2.db.profile.global["spells"]["defaultBar"]
+							s["readyFrame"] = CDTL2.db.profile.global["spells"]["defaultReady"]
+							s["enabled"] = CDTL2.db.profile.global["spells"]["showByDefault"]
+							s["highlight"] = false
+							s["pinned"] = false
+							s["usedBy"] = { CDTL2.player["guid"] }
+							
+							local link, _ = GetSpellLink(s["id"])
+							s["link"] = link
+							
+							if s["bCD"] / 1000 > 3 and s["bCD"] / 1000 < CDTL2.db.profile.global["spells"]["ignoreThreshold"] then
+								s["ignored"] = false
+							else
+								s["ignored"] = true
+							end
+							
+							table.insert(CDTL2.db.profile.tables["spells"], s)
+							
+							if not s["ignored"] then
+								if CDTL2.db.profile.global["spells"]["enabled"] then
+									local f = CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+									
+									f.data["currentCD"] = lockoutTime
+									f.data["overrideCD"] = true
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	
+	-- PALLY SPELL LOCKOUT: AVENGING WRATH
+	if spellName == "Avenging Wrath" and CDTL2.db.profile.global["detectSharedCD"] then
+		local lockoutTime = 30
+		for i = 1, 4, 1 do
+			local secondarySpellName = ""
+			if i == 1 then
+				secondarySpellName = "Divine Protection"
+			elseif i == 2 then
+				secondarySpellName = "Divine Shield"
+			elseif i == 3 then
+				secondarySpellName = "Hand of Protection"
+			elseif i == 4 then
+				secondarySpellName = "Lay on Hands"
+			end
+			
+			local s = CDTL2:GetSpellSettings(secondarySpellName, "spells")
+			if s then
+				if not s["ignored"] then
+					local ef = CDTL2:GetExistingCooldown(secondarySpellName, "spells")
+					if ef then
+						if ef.data["currentCD"] < lockoutTime then
+							CDTL2:SendToLane(ef)
+							CDTL2:SendToBarFrame(ef)
+							
+							ef.data["currentCD"] = lockoutTime
+							ef.data["overrideCD"] = true
+						end
+					else
+						if CDTL2.db.profile.global["spells"]["enabled"] then
+							local f = CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+							f.data["currentCD"] = lockoutTime
+							f.data["overrideCD"] = true
+							
+							if CDTL2:IsUsedBy("spells", s["id"]) then
+								--CDTL2:Print("USEDBY MATCH: "..s["id"])
+							else
+								--CDTL2:Print("NEW USEDBY: "..s["id"])
+								CDTL2:AddUsedBy("spells", s["id"], CDTL2.player["guid"])
+							end
+						end
+					end
+				end
+			else
+				s = CDTL2:GetSpellData(0, secondarySpellName)
+				if s then
+					local _, _, icon, _, _, _, _ = GetSpellInfo(s["id"])
+					
+					s["icon"] = icon
+					s["lane"] = CDTL2.db.profile.global["spells"]["defaultLane"]
+					s["barFrame"] = CDTL2.db.profile.global["spells"]["defaultBar"]
+					s["readyFrame"] = CDTL2.db.profile.global["spells"]["defaultReady"]
+					s["enabled"] = CDTL2.db.profile.global["spells"]["showByDefault"]
+					s["highlight"] = false
+					s["pinned"] = false
+					s["usedBy"] = { CDTL2.player["guid"] }
+					
+					local link, _ = GetSpellLink(s["id"])
+					s["link"] = link
+					
+					if s["bCD"] / 1000 > 3 and s["bCD"] / 1000 < CDTL2.db.profile.global["spells"]["ignoreThreshold"] then
+						s["ignored"] = false
+					else
+						s["ignored"] = true
+					end
+					
+					table.insert(CDTL2.db.profile.tables["spells"], s)
+					
+					if not s["ignored"] then
+						if CDTL2.db.profile.global["spells"]["enabled"] then
+							local f = CDTL2:CreateCooldown(CDTL2:GetUID(),"spells" , s)
+							
+							f.data["currentCD"] = lockoutTime
+							f.data["overrideCD"] = true
+						end
 					end
 				end
 			end
@@ -982,14 +1161,17 @@ function CDTL2:ToggleFrameLock()
 
 		for _, f in pairs(CDTL2.lanes) do
 			private.FrameLock(f)
+			CDTL2:RefreshLane(f.number)
 		end
 		
 		for _, f in pairs(CDTL2.barFrames) do
 			private.FrameLock(f)
+			CDTL2:RefreshBarFrame(f.number)
 		end
 		
 		for _, f in pairs(CDTL2.readyFrames) do
 			private.FrameLock(f)
+			CDTL2:RefreshReady(f.number)
 		end
 		
 		CDTL2:Print("Frames Locked")
@@ -999,14 +1181,17 @@ function CDTL2:ToggleFrameLock()
 		
 		for _, f in pairs(CDTL2.lanes) do
 			private.FrameUnlock(f)
+			CDTL2:RefreshLane(f.number)
 		end
 		
 		for _, f in pairs(CDTL2.barFrames) do
 			private.FrameUnlock(f)
+			CDTL2:RefreshBarFrame(f.number)
 		end
 		
 		for _, f in pairs(CDTL2.readyFrames) do
 			private.FrameUnlock(f)
+			CDTL2:RefreshReady(f.number)
 		end
 		
 		CDTL2:Print("Frames Unlocked")

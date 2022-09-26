@@ -36,13 +36,21 @@ private.GetChangelog = function()
 	changeLog = changeLog.."  - Added Shadowmeld to edge-case handling as it was not getting picked up by standard spell cast detection\n"
 	changeLog = changeLog.."  - Added the ability to clear settings for individual cooldowns (button is found in filters settings)\n"
 	changeLog = changeLog.."  - Added framework to add uncatagorised spell data (Lifeblood and Basic Campfire data added)\n"
+	changeLog = changeLog.."\n"
 	changeLog = changeLog.."Changelog 1.4:\n\n"
 	changeLog = changeLog.."  - Fixed an issue that caused icons/bars to freeze when changing spec\n"
 	changeLog = changeLog.."  - Applied multiple performance upgrades (this is a work in progress, more to come)\n"
 	changeLog = changeLog.."  - Added the option to set icon transparency value in lanes/ready\n"
 	changeLog = changeLog.."  - Added the option to set an overall transparency for each lane\n"
 	changeLog = changeLog.."  - Added the option to attempt detection of shared cooldowns for spells\n"
-	
+	changeLog = changeLog.."\n"
+	changeLog = changeLog.."Changelog 1.5:\n\n"
+	changeLog = changeLog.."  - Applied some more complex performance upgrades\n"
+	changeLog = changeLog.."  - Added all 3 Deathknight pet spells should you wish to track them\n"
+	changeLog = changeLog.."  - Fixed an issue that didnt update some frames on settings changes until next load/reload\n"
+	changeLog = changeLog.."  - Fixed an issue that didnt load icons for edgecase detected spells\n"
+	changeLog = changeLog.."  - Fixed detection of paladin spells that 'share' a lockout (they dont go on cooldown like other spells with 'shared cooldowns')\n"
+		
 	return changeLog
 end
 
@@ -82,6 +90,12 @@ function CDTL2:GetMainOptions()
 							end,
 						set = function(info, val)
 								CDTL2.db.profile.global["autohide"] = val
+								
+								for i = 1, 3, 1 do
+									CDTL2:RefreshLane(i)
+									CDTL2:RefreshReady(i)
+									CDTL2:RefreshBarFrame(i)
+								end
 							end,
 					},
 					enableTooltip = {
@@ -765,7 +779,7 @@ private.GetBarFrameSet = function(i)
 							end,
 						set = function(info, val)
 								frame["transition"]["showTI"] = val
-								CDTL2:RefreshBarFrame(i)
+								CDTL2:RefreshAllBars()
 							end,
 					},
 					style = {
@@ -792,6 +806,7 @@ private.GetBarFrameSet = function(i)
 							end,
 						set = function(info, val)
 								frame["transition"]["style"] = val
+								CDTL2:RefreshAllBars()
 							end,
 					},
 					spacer320 = {
@@ -835,7 +850,7 @@ private.GetBarFrameSet = function(i)
 							end,
 						set = function(info, val)
 								frame["transition"]["texture"] = val
-								CDTL2:RefreshBarFrame(i)
+								CDTL2:RefreshAllBars()
 							end,
 					},
 					fgTextureColor = {
@@ -865,7 +880,7 @@ private.GetBarFrameSet = function(i)
 							end,
 						set = function(info, red, green, blue, alpha)
 								frame["transition"]["textureColor"] = { r = red, g = green, b = blue, a = alpha }
-								CDTL2:RefreshBarFrame(i)
+								CDTL2:RefreshAllBars()
 							end,
 					},
 					spacer330 = {
@@ -4285,6 +4300,15 @@ private.GetTextText = function(s, o, i, r, d)
 			end,
 		set = function(info, val)
 				s["text"] = val
+				
+				if CDTL2:ScanForDynamicTags(val) then
+					s["dtags"] = true
+				end
+				
+				if CDTL2:ScanForTimeTags(val) then
+					s["ttags"] = true
+				end
+				
 				if r == "LANE" then
 					CDTL2:RefreshLane(i)
 				elseif r == "BAR" then

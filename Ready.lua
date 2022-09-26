@@ -42,8 +42,9 @@ private.CreateReady = function(frameNumber)
 	local f = CreateFrame("Frame", frameName, UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 
 	f.number = frameNumber
-	f.updateCount = 1
+	--f.updateCount = 1
 	f.childCount = 0
+	f.validChildren = {}
 	f.combatTimer = 0
 	f.overrideAutohide = false
 	f.forceHide = false
@@ -51,11 +52,12 @@ private.CreateReady = function(frameNumber)
 	f.mf = CreateFrame("Frame", frameName.."_MF", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	f.mf:SetParent(f)
 	f.mf.bg = f.mf:CreateTexture(nil, "BACKGROUND")
-	f.mf.bd = CreateFrame("Frame", frameName.."_BD", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
-	f.mf.bd:SetParent(f.mf)
+	--f.mf.bd = CreateFrame("Frame", frameName.."_BD", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+	--f.mf.bd:SetParent(f.mf)
 	
 	f.currentCount = 0
 	f.previousCount = 0
+	f.mf.triggerUpdate = false
 	
 	f.db = CreateFrame("Frame", frameName.."_DB", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
 	f.db:SetParent(f)
@@ -89,9 +91,9 @@ private.ReadyUpdate = function(f, elapsed)
 	f.forceHide = false
 
 	-- UPDATE
-	if f.updateCount % private.updatePollRate == 0 then
+	if f.mf.triggerUpdate then
 		local children = { f.mf:GetChildren() }
-		local validChildren = {}
+		f.validChildren = {}
 		
 		local count = 0
 		local pinnedCount = 0
@@ -99,7 +101,7 @@ private.ReadyUpdate = function(f, elapsed)
 			if child.valid then
 				if child:GetAlpha() ~= 0 then
 					count = count + 1
-					table.insert(validChildren, child)
+					table.insert(f.validChildren, child)
 				end
 			end
 		end
@@ -122,8 +124,8 @@ private.ReadyUpdate = function(f, elapsed)
 		local mfAnchor = "CENTER"
 	
 		if count == 1 then
-			validChildren[1]:ClearAllPoints()	
-			validChildren[1]:SetPoint("CENTER", xOffset, yOffset)
+			f.validChildren[1]:ClearAllPoints()	
+			f.validChildren[1]:SetPoint("CENTER", xOffset, yOffset)
 		elseif count > 1 then
 			local anchor = "TOP"
 			
@@ -199,7 +201,7 @@ private.ReadyUpdate = function(f, elapsed)
 				
 			end
 			
-			for k, child in ipairs(validChildren) do
+			for k, child in ipairs(f.validChildren) do
 				local x = (bWidth * (k - 1) * xMod) + (bPadX * (k - 1))
 				local y = (bHeight * (k - 1) * yMod) + (bPadY * (k - 1))
 							
@@ -213,54 +215,33 @@ private.ReadyUpdate = function(f, elapsed)
 		f.mf:SetPoint(mfAnchor, xOffset, yOffset)
 		
 		f.childCount = count
-	end
-	
-	-- FRAME (UN)LOCKING
-	if CDTL2.db.profile.global["unlockFrames"] then
-		local _, _, relativeTo, xOfs, yOfs = f:GetPoint()
-
-		--[[if f.number == 1 then
-			CDTL2.db.profile.ready["ready1"]["relativeTo"] = relativeTo
-			CDTL2.db.profile.ready["ready1"]["posX"] = xOfs
-			CDTL2.db.profile.ready["ready1"]["posY"] = yOfs
-		elseif f.number == 2 then
-			CDTL2.db.profile.ready["ready2"]["relativeTo"] = relativeTo
-			CDTL2.db.profile.ready["ready2"]["posX"] = xOfs
-			CDTL2.db.profile.ready["ready2"]["posY"] = yOfs
-		elseif f.number == 3 then
-			CDTL2.db.profile.ready["ready3"]["relativeTo"] = relativeTo
-			CDTL2.db.profile.ready["ready3"]["posX"] = xOfs
-			CDTL2.db.profile.ready["ready3"]["posY"] = yOfs
-		end]]--
 		
-		local _, _, relativeTo, xOfs, yOfs = f:GetPoint()
-		
-		s["relativeTo"] = relativeTo
-		s["posX"] = xOfs
-		s["posY"] = yOfs
-	end
-	
-	if not CDTL2.combat then
-		if f.combatTimer < s["pTime"] then
-			f.combatTimer = f.combatTimer + elapsed
-		else
-			f.forceHide = true
-		end
-	end
-	
-	-- AUTOHIDE
-	if f.updateCount % private.autohidePollRate == 0 then
 		if s["enabled"] then
 			CDTL2:Autohide(f, s)
 		else
 			f:SetAlpha(0)
 		end
+		
+		f.mf.triggerUpdate = false
 	end
 	
-	-- UPDATE COUNT
-	f.updateCount = f.updateCount + 1
-	if f.updateCount > 12000 then
-		f.updateCount = 1
+	if f:GetAlpha() ~= 0 then
+		if not CDTL2.combat then
+			if f.combatTimer < s["pTime"] then
+				f.combatTimer = f.combatTimer + elapsed
+			else
+				f.forceHide = true
+			end
+		end
+	
+		-- FRAME (UN)LOCKING
+		if CDTL2.db.profile.global["unlockFrames"] then
+			local _, _, relativeTo, xOfs, yOfs = f:GetPoint()
+			
+			s["relativeTo"] = relativeTo
+			s["posX"] = xOfs
+			s["posY"] = yOfs
+		end
 	end
 end
 
@@ -299,8 +280,19 @@ function CDTL2:RefreshReady(i)
 	)
 	
 	-- BORDER
-	CDTL2:SetBorder(f.mf.bd, s["border"])
-	f.mf.bd:SetFrameLevel(f.mf:GetFrameLevel() + 1)
+	if s["border"]["style"] ~= "None" then
+		if not f.bd then
+			f.mf.bd = CreateFrame("Frame", f:GetName().."_BD", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
+			f.mf.bd:SetParent(f)
+		end
+	
+		CDTL2:SetBorder(f.mf.bd, s["border"])
+		f.mf.bd:SetFrameLevel(f.mf:GetFrameLevel() + 1)
+	else
+		if f.mf.bd then
+			f.mf.bd:Hide()
+		end
+	end
 	
 	-- ANIMATION
 	f.animateIn = f:CreateAnimationGroup()
@@ -338,6 +330,8 @@ function CDTL2:RefreshReady(i)
 		CDTL2.colors["db"]["b"],
 		CDTL2.colors["db"]["a"]
 	)
+	
+	CDTL2:Autohide(f, s)
 	
 	if CDTL2.db.profile.global["unlockFrames"] then
 		CDTL2:FrameUnlock(f)
