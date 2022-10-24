@@ -10,7 +10,7 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.5
+CDTL2.version = 1.6
 CDTL2.noticeVersion = 1.5
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
@@ -31,6 +31,7 @@ CDTL2.colors = {
 	db = { r = 0.1, g = 0.1, b = 0.1, a = 0.85 },
 }
 CDTL2.combat = false
+CDTL2.enabled = false
 local private = {}
 
 local defaults = {
@@ -52,6 +53,10 @@ local defaults = {
 			notUsableTint = false,
 			notUsableDesaturate = false,
 			notUsableColor = { r = 0.75, g = 0.1, b = 0.1, a = 1 },
+			
+			enabledAlways = true,
+			enabledGroup = false,
+			enabledInstance = false,
 			
 			spells = {
 				enabled = true,
@@ -2002,17 +2007,21 @@ function CDTL2:OnInitialize()
 end
 
 function CDTL2:OnEnable()
-	self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
-	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	--self:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+	--self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
-	self:RegisterEvent("ITEM_LOCK_CHANGED")
+	--self:RegisterEvent("ITEM_LOCK_CHANGED")
 	
-	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	self:RegisterEvent("PLAYER_REGEN_ENABLED")
-	self:RegisterEvent("UNIT_POWER_FREQUENT")
-	self:RegisterEvent("UNIT_POWER_UPDATE")
+	--self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	--self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	--self:RegisterEvent("UNIT_POWER_FREQUENT")
+	--self:RegisterEvent("UNIT_POWER_UPDATE")
 	
-	self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	--self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+	self:RegisterEvent("GROUP_JOINED")
+	self:RegisterEvent("GROUP_LEFT")
 
 	CDTL2:CreateLanes()
 	CDTL2:CreateBarFrames()
@@ -2649,7 +2658,7 @@ function CDTL2:UNIT_SPELLCAST_SUCCEEDED(...)
 				end
 			else
 				-- ITEM SPELLS
-				local s = CDTL2:GetSpellSettings(spellName, "items", spellID)
+				local s = CDTL2:GetSpellSettings(spellName, "items", spellID)				
 				if s then
 					if not s["ignored"] then
 						local ef = CDTL2:GetExistingCooldown(s["name"], "items")
@@ -3009,5 +3018,96 @@ function CDTL2:ACTIVE_TALENT_GROUP_CHANGED()
 		else
 			cd.data["currentCD"] = 0
 		end
+	end
+end
+
+function CDTL2:PLAYER_ENTERING_WORLD()	
+	local turnOn = CDTL2:DetermineOnOff()
+	
+	if turnOn then
+		CDTL2:TurnOn()
+	else
+		CDTL2:TurnOff()
+	end
+end
+
+function CDTL2:GROUP_JOINED()	
+	local turnOn = CDTL2:DetermineOnOff()
+	
+	if turnOn then
+		CDTL2:TurnOn()
+	else
+		CDTL2:TurnOff()
+	end
+end
+
+function CDTL2:GROUP_LEFT()	
+	local turnOn = CDTL2:DetermineOnOff()
+	
+	if turnOn then
+		CDTL2:TurnOn()
+	else
+		CDTL2:TurnOff()
+	end
+end
+
+function CDTL2:DetermineOnOff()
+	local turnOn = false
+	
+	if CDTL2.db.profile.global["enabledAlways"] then
+		turnOn = true
+	else
+		local inInstance, instanceType = IsInInstance()
+		local inGroup = IsInGroup()
+		
+		if inInstance or inGroup then
+			if inInstance and CDTL2.db.profile.global["enabledInstance"] then
+				turnOn = true
+			end
+			
+			if inGroup and CDTL2.db.profile.global["enabledGroup"] then
+				turnOn = true
+			end
+		end
+	end
+	
+	return turnOn
+end
+
+function CDTL2:TurnOn()	
+	if not CDTL2.enabled then
+		if CDTL2.db.profile.global["debugMode"] then
+			CDTL2:Print("ENABLING DETECTION")
+		end
+	
+		CDTL2:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		CDTL2:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+		CDTL2:RegisterEvent("ITEM_LOCK_CHANGED")
+		CDTL2:RegisterEvent("PLAYER_REGEN_DISABLED")
+		CDTL2:RegisterEvent("PLAYER_REGEN_ENABLED")
+		CDTL2:RegisterEvent("UNIT_POWER_FREQUENT")
+		CDTL2:RegisterEvent("UNIT_POWER_UPDATE")
+		CDTL2:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+		
+		CDTL2.enabled = true
+	end
+end
+
+function CDTL2:TurnOff()
+	if CDTL2.enabled then
+		if CDTL2.db.profile.global["debugMode"] then
+			CDTL2:Print("DISABLING DETECTION")
+		end
+		
+		CDTL2:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+		CDTL2:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+		CDTL2:UnregisterEvent("ITEM_LOCK_CHANGED")
+		CDTL2:UnregisterEvent("PLAYER_REGEN_DISABLED")
+		CDTL2:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		CDTL2:UnregisterEvent("UNIT_POWER_FREQUENT")
+		CDTL2:UnregisterEvent("UNIT_POWER_UPDATE")
+		CDTL2:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+		
+		CDTL2.enabled = false
 	end
 end

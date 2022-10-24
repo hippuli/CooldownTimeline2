@@ -394,6 +394,28 @@ function CDTL2:CheckEdgeCases(spellName)
 	end
 end
 
+function CDTL2:CheckEngTinkerCases(spellName)
+	if spellName == "Mind Amplification Dish" then
+		return true, 1
+	elseif spellName == "Flexweave Underlay" then
+		return true, 15
+	elseif spellName == "Springy Arachnoweave" then
+		return true, 15
+	elseif spellName == "Hand-Mounted Pyro Rocket" then
+		return true, 10
+	elseif spellName == "Hyperspeed Accelerators" then
+		return true, 10
+	elseif spellName == "Frag Belt" then
+		return true, 6
+	elseif spellName == "Personal Electromagnetic Pulse Generator" then
+		return true, 6
+	elseif spellName == "Nitro Boosts" then
+		return true, 8
+	end
+	
+	return false, nil
+end
+
 function CDTL2:ConvertTime(raw, style)
 	local t = ""
 	
@@ -472,8 +494,6 @@ function CDTL2:GetItemSpell(id)
 		local spellName, spellID = GetItemSpell(itemId)
 		
 		if spellID == id then
-			local start, duration, enabled = GetItemCooldown(itemId)
-			
 			--if duration < 1.51 then
 				--CDTL2:Print("FOUND-EQUIPPED: "..itemId.." - TOO LOW!!!")
 			--else
@@ -510,7 +530,7 @@ function CDTL2:GetItemSpell(id)
 			local itemId = GetContainerItemID(i, x)
 			local spellName, spellID = GetItemSpell(itemId)
 			
-			if spellID == id then
+			if spellID == id then				
 				local s = {}
 					s["name"] = spellName
 					s["id"] = spellID

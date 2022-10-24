@@ -382,13 +382,14 @@ function CDTL2:RefreshBar(cd)
 		
 		private.CalcTransitionIndicator(cd, s)
 		f.bar.ti:Show()
+		f.txt:SetFrameLevel(f.bar.ti:GetFrameLevel() + 1)
 	else
 		if f.bar.ti then
 			f.bar.ti:Hide()
 		end
+		
+		private.CalcTransitionIndicator(cd, s)
 	end	
-	
-	f.txt:SetFrameLevel(f.bar.ti:GetFrameLevel() + 1)
 	
 	-- BORDER
 	if s["bar"]["border"]["style"] ~= "None" then
@@ -746,21 +747,26 @@ private.BarUpdate = function(f, elapsed)
 			local pBase = d["baseCD"]
 			local pCurrent = d["currentCD"]
 			
-			if s["transition"]["hideTransitioned"] then
-				if d["currentCD"] > ba.transitionThreshold then
-					if not ba.valid then
-						ba.valid = true
-						ba:GetParent().triggerUpdate = true
-					end
-					
-					if s["transition"]["style"] == "SHORTEN" then
-						pBase = pBase - ba.transitionThreshold
-						pCurrent = pCurrent - ba.transitionThreshold
-					end
-				else
-					if ba.valid then
-						ba.valid = false
-						ba:GetParent().triggerUpdate = true
+			if d["lane"] == 0 then
+				-- For now, do nothing
+			else
+				if s["transition"]["hideTransitioned"] then
+					--CDTL2:Print(tostring(d["currentCD"]).." - "..tostring(ba.transitionThreshold))
+					if d["currentCD"] > ba.transitionThreshold then
+						if not ba.valid then
+							ba.valid = true
+							ba:GetParent().triggerUpdate = true
+						end
+						
+						if s["transition"]["style"] == "SHORTEN" then
+							pBase = pBase - ba.transitionThreshold
+							pCurrent = pCurrent - ba.transitionThreshold
+						end
+					else
+						if ba.valid then
+							ba.valid = false
+							ba:GetParent().triggerUpdate = true
+						end
 					end
 				end
 			end
@@ -945,25 +951,35 @@ private.CalcTransitionIndicator = function(f, s)
 					position = percent / 2
 				end
 				
-				f.bar.bar.ti:SetAlpha(1)
+				if f.bar.bar.ti then
+					f.bar.bar.ti:SetAlpha(1)
+				end
 			end
 		else
+			if f.bar.bar.ti then
+				f.bar.bar.ti:SetAlpha(0)
+			end
+		end
+		
+		if f.bar.bar.ti then		
+			f.bar.bar.ti:ClearAllPoints()
+			f.bar.bar.ti:SetPoint("LEFT", position, 0)
+			f.bar.bar.ti:SetSize(width, s["height"])
+			f.bar.bar.ti.bg:SetTexture(CDTL2.LSM:Fetch("statusbar", s["transition"]["texture"]))
+			f.bar.bar.ti.bg:SetAllPoints(true)
+			f.bar.bar.ti.bg:SetVertexColor(
+				s["transition"]["textureColor"]["r"],
+				s["transition"]["textureColor"]["g"],
+				s["transition"]["textureColor"]["b"],
+				s["transition"]["textureColor"]["a"]
+			)
+		end
+	else
+		if f.bar.bar.ti then
 			f.bar.bar.ti:SetAlpha(0)
 		end
 		
-		f.bar.bar.ti:ClearAllPoints()
-		f.bar.bar.ti:SetPoint("LEFT", position, 0)
-		f.bar.bar.ti:SetSize(width, s["height"])
-		f.bar.bar.ti.bg:SetTexture(CDTL2.LSM:Fetch("statusbar", s["transition"]["texture"]))
-		f.bar.bar.ti.bg:SetAllPoints(true)
-		f.bar.bar.ti.bg:SetVertexColor(
-			s["transition"]["textureColor"]["r"],
-			s["transition"]["textureColor"]["g"],
-			s["transition"]["textureColor"]["b"],
-			s["transition"]["textureColor"]["a"]
-		)
-	else
-		f.bar.bar.ti:SetAlpha(0)
+		f.bar.transitionThreshold = 10000000
 	end
 end
 
@@ -1027,9 +1043,21 @@ private.CooldownUpdate = function(f, elapsed)
 				if d["baseCD"] == 0 then
 					d["currentCD"] = 1000
 					
-					local start, duration, enabled = GetItemCooldown(d["itemID"])
-					d["baseCD"] = duration
-					CDTL2:SetSpellData(d["name"], "items", "bCD", duration * 1000)
+					local tinker, slot = CDTL2:CheckEngTinkerCases(d["name"])
+					if tinker then
+						local _, spellID = GetItemSpell(d["itemID"])
+						if spellID == d["id"] then
+							local start, duration, enabled = GetInventoryItemCooldown("player", slot)
+							
+							d["baseCD"] = duration
+							CDTL2:SetSpellData(d["name"], "items", "bCD", duration * 1000)
+						end
+					else
+						local start, duration, enabled = GetItemCooldown(d["itemID"])
+						
+						d["baseCD"] = duration
+						CDTL2:SetSpellData(d["name"], "items", "bCD", duration * 1000)
+					end
 					
 					if d["baseCD"] > 3 and d["baseCD"] <= CDTL2.db.profile.global["items"]["ignoreThreshold"] then
 						d["ignored"] = false
@@ -1047,9 +1075,19 @@ private.CooldownUpdate = function(f, elapsed)
 			d["currentCD"] = d["currentCD"] - elapsed
 			if d["currentCD"] >= 0 then
 				if f.updateCount % 50 == 0 then
-					local start, duration, enabled = GetItemCooldown(d["itemID"])
-					d["baseCD"] = duration
-					d["currentCD"] = start + duration - GetTime()
+					local tinker, slot = CDTL2:CheckEngTinkerCases(d["name"])
+					if tinker then
+						local _, spellID = GetItemSpell(d["itemID"])
+						if spellID == d["id"] then
+							local start, duration, enabled = GetInventoryItemCooldown("player", slot)
+							d["baseCD"] = duration
+							d["currentCD"] = start + duration - GetTime()
+						end
+					else
+						local start, duration, enabled = GetItemCooldown(d["itemID"])
+						d["baseCD"] = duration
+						d["currentCD"] = start + duration - GetTime()
+					end
 				end
 			end
 			
@@ -1450,11 +1488,20 @@ function CDTL2:SendToReady(f)
 			ic:SetParent("CDTL2_Ready_1_MF")
 			s = CDTL2.db.profile.ready["ready1"]
 			ic.readyTime = s["nTime"]
-			PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
+			
+			if f.data["highlight"] then
+				if s["hSound"] ~= "None" then
+					PlaySoundFile(CDTL2.LSM:Fetch("sound", s["hSound"]), "SFX")
+				end
+			else
+				if s["nSound"] ~= "None" then
+					PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
+				end
+			end
+			
 			CDTL2_Ready_1.combatTimer = 0
 			CDTL2_Ready_1_MF.triggerUpdate = true
 			f.data["overrideCD"] = false
-			--CDTL2_Ready_1.currentCount = CDTL2_Ready_1.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end		
@@ -1464,11 +1511,20 @@ function CDTL2:SendToReady(f)
 			ic:SetParent("CDTL2_Ready_2_MF")
 			s = CDTL2.db.profile.ready["ready2"]
 			ic.readyTime = s["nTime"]
-			PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
+			
+			if f.data["highlight"] then
+				if s["hSound"] ~= "None" then
+					PlaySoundFile(CDTL2.LSM:Fetch("sound", s["hSound"]), "SFX")
+				end
+			else
+				if s["nSound"] ~= "None" then
+					PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
+				end
+			end
+			
 			CDTL2_Ready_2.combatTimer = 0
 			CDTL2_Ready_2_MF.triggerUpdate = true
 			f.data["overrideCD"] = false
-			--CDTL2_Ready_2.currentCount = CDTL2_Ready_2.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end
@@ -1478,11 +1534,20 @@ function CDTL2:SendToReady(f)
 			ic:SetParent("CDTL2_Ready_3_MF")
 			s = CDTL2.db.profile.ready["ready3"]
 			ic.readyTime = s["nTime"]
-			PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
+			
+			if f.data["highlight"] then
+				if s["hSound"] ~= "None" then
+					PlaySoundFile(CDTL2.LSM:Fetch("sound", s["hSound"]), "SFX")
+				end
+			else
+				if s["nSound"] ~= "None" then
+					PlaySoundFile(CDTL2.LSM:Fetch("sound", s["nSound"]), "SFX")
+				end
+			end
+			
 			CDTL2_Ready_3.combatTimer = 0
 			CDTL2_Ready_3_MF.triggerUpdate = true
 			f.data["overrideCD"] = false
-			--CDTL2_Ready_3.currentCount = CDTL2_Ready_3.currentCount + 1
 		else
 			CDTL2:SendToHolding(f)
 		end

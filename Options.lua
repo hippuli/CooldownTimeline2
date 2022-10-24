@@ -11,45 +11,16 @@ private.GetChangelog = function()
 	changeLog = changeLog.."CDTL2 is an almost complete re-write of the mod\n\n"
 	changeLog = changeLog.."Version 1 settings are saved independent of version 2, so you can manually install and use old versions if you wish\n"
 	changeLog = changeLog.."This also means version 1 settings will not roll over into version 2\n\n"
-	changeLog = changeLog.."Changelog:\n\n"
-	changeLog = changeLog.."  - One Timeline + 1 Fastlane has now become up to 3 lanes, each fully independent and customisable\n"
-	changeLog = changeLog.."  - Likewise there are now up to 3 ready, and 3 bar areas\n"
-	changeLog = changeLog.."  - The filtering system has been re-designed and - hopefully - simplified\n"
-	changeLog = changeLog.."  - Now includes custom sounds, textures, and a custom font\n"
-	changeLog = changeLog.."  - Now fully supports Classic Era, The Burning Crusade, and Wrath of the Lich King at the same time\n"
-	changeLog = changeLog.."  - Almost all features from version 1 should be present in version 2 (let me know if anything is missing)\n"
 	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.1:\n\n"
-	changeLog = changeLog.."  - Fixed an issue that caused a lane to show up when there was a disabled icon in it\n"
-	changeLog = changeLog.."  - Adjusted ignored threshold detection slightly so that a cooldown equal to the threshold is no longer ignored\n"
-	changeLog = changeLog.."  - Added tracking options for MH/OH swing timers, and also ranged auto-attack timer(ranged appears to be slightly out at the moment)\n"
-	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.2:\n\n"
-	changeLog = changeLog.."  - Fixed an issue with racial cooldown data for TBC that caused errors when they are cast\n"
-	changeLog = changeLog.."  - Fixed an issue with icon stacking that caused icons to switch places in the stack rapidly - hopefully fixed, its tough to reproduce\n"
-	changeLog = changeLog.."  - Added support for runic power tracking/custom text\n"
-	changeLog = changeLog.."  - Updated custom text tag for short cooldown name to ignore brackets - eg.Faire Fire (Feral) is now FFF instead of FF(\n"
-	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.3:\n\n"
-	changeLog = changeLog.."  - Fixed an issue with vertical bars that caused icons to rapidly move position when stacking\n"
-	changeLog = changeLog.."  - Reworked offensive target detection/updates to hopefully fix offensive buff/debuff issues\n"
-	changeLog = changeLog.."  - Added Shadowmeld to edge-case handling as it was not getting picked up by standard spell cast detection\n"
-	changeLog = changeLog.."  - Added the ability to clear settings for individual cooldowns (button is found in filters settings)\n"
-	changeLog = changeLog.."  - Added framework to add uncatagorised spell data (Lifeblood and Basic Campfire data added)\n"
-	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.4:\n\n"
-	changeLog = changeLog.."  - Fixed an issue that caused icons/bars to freeze when changing spec\n"
-	changeLog = changeLog.."  - Applied multiple performance upgrades (this is a work in progress, more to come)\n"
-	changeLog = changeLog.."  - Added the option to set icon transparency value in lanes/ready\n"
-	changeLog = changeLog.."  - Added the option to set an overall transparency for each lane\n"
-	changeLog = changeLog.."  - Added the option to attempt detection of shared cooldowns for spells\n"
-	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.5:\n\n"
-	changeLog = changeLog.."  - Applied some more complex performance upgrades\n"
-	changeLog = changeLog.."  - Added all 3 Deathknight pet spells should you wish to track them\n"
-	changeLog = changeLog.."  - Fixed an issue that didnt update some frames on settings changes until next load/reload\n"
-	changeLog = changeLog.."  - Fixed an issue that didnt load icons for edgecase detected spells\n"
-	changeLog = changeLog.."  - Fixed detection of paladin spells that 'share' a lockout (they dont go on cooldown like other spells with 'shared cooldowns')\n"
+	changeLog = changeLog.."Changelog 1.6:\n\n"
+	changeLog = changeLog.."  - Updated TOC file to WotLK build number\n"
+	changeLog = changeLog.."  - Fixed an issue that caused an error for a cooldown that exists as a bar, but not an icon\n"
+	changeLog = changeLog.."  - Fixed an issue that caused an error when the transition indicator was disabled\n"
+	changeLog = changeLog.."  - Fixed an issue that stopped lanes/barframes/readyframes from hiding when disabled\n"
+	changeLog = changeLog.."  - Found an issue that prevented Nitro Boosts (and presumably other tinker mods) from showing up as a cooldown, and fixed it (hopefully)\n"
+	changeLog = changeLog.."  - Added the option to enable cd/duration detection always/in-group/in-instance\n"
+	changeLog = changeLog.."  - Added the option to remove item settings for quest items (found in Filters > Defaults with items selected)\n"
+	changeLog = changeLog.."  - Highlighted icons will now play the specific highlighted sound instead of the normal sound\n"
 		
 	return changeLog
 end
@@ -66,10 +37,89 @@ function CDTL2:GetMainOptions()
 				order = 100,
 				childGroups  = "tab",
 				args = {
+					spacer100 = {
+						name = "\nEnabled:\n",
+						type = "description",
+						order = 100,
+					},
+					enabledAlways = {
+						name = "Always",
+						desc = "If selected, CD/Duration detection will always be on",
+						order = 101,
+						type = "toggle",
+						--width = "full",
+						get = function(info, index)
+								return CDTL2.db.profile.global["enabledAlways"]
+							end,
+						set = function(info, val)
+								CDTL2.db.profile.global["enabledAlways"] = val
+								
+								local turnOn = CDTL2:DetermineOnOff()
+	
+								if turnOn then
+									CDTL2:TurnOn()
+								else
+									CDTL2:TurnOff()
+								end
+							end,
+					},
+					enabledGroup = {
+						name = "In Group",
+						desc = "If selected, CD/Duration detection will be enabled when in a party/raid",
+						order = 102,
+						type = "toggle",
+						--width = "full",
+						disabled = function(info)
+								return CDTL2.db.profile.global["enabledAlways"]
+							end,
+						get = function(info, index)
+								return CDTL2.db.profile.global["enabledGroup"]
+							end,
+						set = function(info, val)
+								CDTL2.db.profile.global["enabledGroup"] = val
+								
+								local turnOn = CDTL2:DetermineOnOff()
+	
+								if turnOn then
+									CDTL2:TurnOn()
+								else
+									CDTL2:TurnOff()
+								end
+							end,
+					},
+					enabledInstance = {
+						name = "In Instance",
+						desc = "If selected, CD/Duration detection will be enabled when in an instance/raid/bg/arena",
+						order = 103,
+						type = "toggle",
+						--width = "full",
+						disabled = function(info)
+								return CDTL2.db.profile.global["enabledAlways"]
+							end,
+						get = function(info, index)
+								return CDTL2.db.profile.global["enabledInstance"]
+							end,
+						set = function(info, val)
+								CDTL2.db.profile.global["enabledInstance"] = val
+								
+								local turnOn = CDTL2:DetermineOnOff()
+	
+								if turnOn then
+									CDTL2:TurnOn()
+								else
+									CDTL2:TurnOff()
+								end
+							end,
+					},
+					spacer199 = {
+						name = "\n\n",
+						type = "description",
+						order = 199,
+					},
 					unlockFrames = {
 						name = "Unlock Frames",
 						desc = "Unlock frames to allow drag and drop movement",
-						order = 100,
+						order = 200,
 						type = "toggle",
 						width = "full",
 						get = function(info, index)
@@ -82,7 +132,7 @@ function CDTL2:GetMainOptions()
 					autohide = {
 						name = "Auto-hide Frames",
 						desc = "If selected frames will hide themselves when there is no active bar/icon in it",
-						order = 200,
+						order = 201,
 						type = "toggle",
 						width = "full",
 						get = function(info, index)
@@ -331,6 +381,38 @@ function CDTL2:GetFilterOptions()
 								
 								CDTL2.currentFilter[string.lower(default)] = ""
 								CDTL2.currentFilterHidden[string.lower(default)] = true
+							end
+					},
+					clearQuestItems = {
+						name = "Clear Quest Items",
+						desc = function(info)
+								return "This will clear all "..string.lower(CDTL2.currentFilter["default"]).." cooldown settings"
+							end,
+						confirm = true,
+						order = 104,
+						type = "execute",
+						hidden = function(info)
+								if string.lower(CDTL2.currentFilter["default"]) ~= "items" then
+									return true
+								end
+								
+								return false
+							end,
+						func = function(info)
+								local cleanTable = {}
+						
+								for k, v in pairs(CDTL2.db.profile.tables["items"]) do
+									--CDTL2:Print(v["name"])
+									local _, _, _, _, _, classID, subclassID = GetItemInfoInstant(v["itemID"])
+									
+									if classID == 12 then
+										--CDTL2:Print(v["name"].." ("..v["itemName"]..")")
+									else
+										table.insert(cleanTable, v)
+									end
+								end
+								
+								CDTL2.db.profile.tables["items"] = cleanTable
 							end
 					},
 					spacer200 = {
@@ -713,7 +795,12 @@ private.GetBarFrameSet = function(i)
 							end,
 						set = function(info, val)
 								frame["enabled"] = val
-								CDTL2:CreateBarFrames()
+								
+								if val then
+									CDTL2:CreateBarFrames()
+								end
+								
+								CDTL2:RefreshBarFrame(i)
 							end,
 					},
 					spacer200 = {
@@ -1873,7 +1960,12 @@ private.GetLaneSet = function(i)
 							end,
 						set = function(info, val)
 								lane["enabled"] = val
-								CDTL2:CreateLanes()
+								
+								if val then
+									CDTL2:CreateLanes()
+								end
+								
+								CDTL2:RefreshLane(i)
 							end,
 					},
 					spacer103 = {
@@ -3692,7 +3784,12 @@ private.GetReadySet = function(i)
 							end,
 						set = function(info, val)
 								ready["enabled"] = val
-								CDTL2:CreateReadyFrames()
+								
+								if val then
+									CDTL2:CreateReadyFrames()
+								end
+								
+								CDTL2:RefreshReady(i)
 							end,
 					},
 					spacer200 = {

@@ -130,7 +130,12 @@ function CDTL2:RefreshBarFrame(i)
 		CDTL2.colors["db"]["a"]
 	)
 	
-	CDTL2:Autohide(f, s)
+	if s["enabled"] then
+		f:Show()
+		CDTL2:Autohide(f, s)
+	else
+		f:Hide()
+	end
 	
 	if CDTL2.db.profile.global["unlockFrames"] then
 		CDTL2:FrameUnlock(f)
