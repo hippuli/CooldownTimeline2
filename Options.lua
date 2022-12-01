@@ -12,15 +12,15 @@ private.GetChangelog = function()
 	changeLog = changeLog.."Version 1 settings are saved independent of version 2, so you can manually install and use old versions if you wish\n"
 	changeLog = changeLog.."This also means version 1 settings will not roll over into version 2\n\n"
 	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.6:\n\n"
-	changeLog = changeLog.."  - Updated TOC file to WotLK build number\n"
-	changeLog = changeLog.."  - Fixed an issue that caused an error for a cooldown that exists as a bar, but not an icon\n"
-	changeLog = changeLog.."  - Fixed an issue that caused an error when the transition indicator was disabled\n"
-	changeLog = changeLog.."  - Fixed an issue that stopped lanes/barframes/readyframes from hiding when disabled\n"
-	changeLog = changeLog.."  - Found an issue that prevented Nitro Boosts (and presumably other tinker mods) from showing up as a cooldown, and fixed it (hopefully)\n"
-	changeLog = changeLog.."  - Added the option to enable cd/duration detection always/in-group/in-instance\n"
-	changeLog = changeLog.."  - Added the option to remove item settings for quest items (found in Filters > Defaults with items selected)\n"
-	changeLog = changeLog.."  - Highlighted icons will now play the specific highlighted sound instead of the normal sound\n"
+	changeLog = changeLog.."Changelog 1.7:\n\n"
+	changeLog = changeLog.."  - Fixed an issue that would show runes filter options when not a DK\n"
+	changeLog = changeLog.."  - Added initial support for setting various ui elements to class colors\n"
+	changeLog = changeLog.."  - Added initial support for internal cooldown tracking\n"
+	changeLog = changeLog.."  - ICD tracking only works for epic WotLK P1 trinkets at this time (more items will be updated after testing)\n"
+	changeLog = changeLog.."  - Slightly tweaked filter settings UI\n"
+	changeLog = changeLog.."  - Slightly tweaked item detection/settings system (more coming soon)\n"
+	changeLog = changeLog.."  - Further adjusted offensives to more accurately track them\n"
+	changeLog = changeLog.."  - Warlock ability Metamorphosis should now be able to be tracked\n"
 		
 	return changeLog
 end
@@ -260,10 +260,382 @@ function CDTL2:GetMainOptions()
 					},
 				},
 			},
+			colors = {
+				name = "Colors",
+				type = "group",
+				order = 200,
+				childGroups  = "tab",
+				args = {
+					spacer100 = {
+						name = "\nClass Colors",
+						type = "description",
+						fontSize = "large",
+						order = 100,
+					},
+					spacer200 = {
+						name = "\n",
+						type = "description",
+						order = 200,
+					},
+					deathknightColor = {
+						name = "Death Knight",
+						desc = "Set the Death Knight class color",
+						order = 201,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["DEATHKNIGHT"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["DEATHKNIGHT"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					druidColor = {
+						name = "Druid",
+						desc = "Set the Druid class color",
+						order = 202,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["DRUID"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["DRUID"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					hunterColor = {
+						name = "Hunter",
+						desc = "Set the Hunter class color",
+						order = 203,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["HUNTER"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["HUNTER"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					mageColor = {
+						name = "Mage",
+						desc = "Set the Mage class color",
+						order = 204,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["MAGE"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["MAGE"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					paladinColor = {
+						name = "Paladin",
+						desc = "Set the Paladin class color",
+						order = 205,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["PALADIN"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["PALADIN"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					priestColor = {
+						name = "Priest",
+						desc = "Set the Priest class color",
+						order = 206,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["PRIEST"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["PRIEST"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					rogueColor = {
+						name = "Rogue",
+						desc = "Set the Rogue class color",
+						order = 207,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["ROGUE"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["ROGUE"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					shamanColor = {
+						name = "Shaman",
+						desc = "Set the Shaman class color",
+						order = 208,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["SHAMAN"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["SHAMAN"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					warlockColor = {
+						name = "Warlock",
+						desc = "Set the Warlock class color",
+						order = 209,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["WARLOCK"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["WARLOCK"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					warriorColor = {
+						name = "Warrior",
+						desc = "Set the Warrior class color",
+						order = 210,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["classColors"]["WARRIOR"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["classColors"]["WARRIOR"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					--[[spacer300 = {
+						name = "\nSpell School Colors",
+						type = "description",
+						fontSize = "large",
+						order = 300,
+					},
+					spacer400 = {
+						name = "\n",
+						type = "description",
+						order = 400,
+					},
+					physicalColor = {
+						name = "Physical",
+						desc = "Set the physical spell school color",
+						order = 401,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Physical"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Physical"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					holyColor = {
+						name = "Holy",
+						desc = "Set the holy spell school color",
+						order = 402,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Holy"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Holy"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					fireColor = {
+						name = "Fire",
+						desc = "Set the fire spell school color",
+						order = 403,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Fire"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Fire"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					natureColor = {
+						name = "Nature",
+						desc = "Set the nature spell school color",
+						order = 404,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Nature"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Nature"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					frostColor = {
+						name = "Frost",
+						desc = "Set the frost spell school color",
+						order = 405,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Frost"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Frost"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					shadowColor = {
+						name = "Shadow",
+						desc = "Set the shadow spell school color",
+						order = 406,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Shadow"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Shadow"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					arcaneColor = {
+						name = "Arcane",
+						desc = "Set the arcane spell school color",
+						order = 407,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Arcane"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Arcane"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},
+					otherColor = {
+						name = "Other",
+						desc = "Set the other spell school color",
+						order = 408,
+						type = "color",
+						hasAlpha = true,
+						get = function(info)
+								local t = CDTL2.db.profile.global["schoolColors"]["Other"]
+								
+								local r = t["r"]
+								local g = t["g"]
+								local b = t["b"]
+								local a = t["a"]
+								return r, g, b, a
+							end,
+						set = function(info, red, green, blue, alpha)
+								CDTL2.db.profile.global["schoolColors"]["Other"] = { r = red, g = green, b = blue, a = alpha }
+							end,
+					},]]--
+				},
+			},
 			changelog = {
 				name = "Changelog",
 				type = "group",
-				order = 200,
+				order = 300,
 				childGroups  = "tab",
 				args = {
 					spacer100 = {
@@ -298,6 +670,7 @@ function CDTL2:GetFilterOptions()
 		offensives = "",
 		petspells = "",
 		runes = "",
+		icds = "",
 	}
 	CDTL2.currentFilterHidden = {
 		default = true,
@@ -308,6 +681,7 @@ function CDTL2:GetFilterOptions()
 		offensives = true,
 		petspells = true,
 		runes = true,
+		icds = true,
 	}
 
 	local options = {
@@ -338,11 +712,11 @@ function CDTL2:GetFilterOptions()
 									choices["DEBUFFS"] = "Debufs"
 									choices["OFFENSIVES"] = "Offensives"
 									choices["PETSPELLS"] = "Pet Spells"
+									choices["ICDS"] = "ICDs"
 									
 								if CDTL2.player["class"] == "DEATHKNIGHT" then
 									choices["RUNES"] = "Runes"
 								end
-								
 								return choices
 							end,
 						get = function(info)
@@ -402,11 +776,9 @@ function CDTL2:GetFilterOptions()
 								local cleanTable = {}
 						
 								for k, v in pairs(CDTL2.db.profile.tables["items"]) do
-									--CDTL2:Print(v["name"])
 									local _, _, _, _, _, classID, subclassID = GetItemInfoInstant(v["itemID"])
 									
 									if classID == 12 then
-										--CDTL2:Print(v["name"].." ("..v["itemName"]..")")
 									else
 										table.insert(cleanTable, v)
 									end
@@ -426,9 +798,9 @@ function CDTL2:GetFilterOptions()
 					enabled = {
 						name = "Enabled",
 						desc = "If unselected cooldowns of this type will be ignored",
-						order = 201,
+						order = 201.1,
 						type = "toggle",
-						width = "full",
+						--width = "half",
 						hidden = function(info)
 								return CDTL2.currentFilterHidden["default"]
 							end,
@@ -447,12 +819,53 @@ function CDTL2:GetFilterOptions()
 								end
 							end,
 					},
+					onlyPlayer = {
+						name = "Player Only",
+						desc = function(info)
+								local default = string.lower(CDTL2.currentFilter["default"])
+								return "If selected only "..default.." applied by the player will be tracked"
+							end,
+						order = 201.2,
+						type = "toggle",
+						--width = "half",
+						hidden = function(info)
+								local default = string.lower(CDTL2.currentFilter["default"])
+								
+								if default == "buffs" or default == "debuffs" then
+									return false
+								end
+								
+								return true
+							end,
+						get = function(info, index)
+								local default = string.lower(CDTL2.currentFilter["default"])
+								
+								if default == "buffs" or default == "debuffs" then
+									return CDTL2.db.profile.global[default]["onlyPlayer"]
+								end
+								
+								return false
+							end,
+						set = function(info, val)
+								local default = string.lower(CDTL2.currentFilter["default"])
+								
+								if default == "buffs" or default == "debuffs" then
+									CDTL2.db.profile.global[default]["onlyPlayer"] = val
+								end
+								
+								--[[for _, cd in pairs(CDTL2.cooldowns) do
+									if cd.data["type"] == string.lower(default) then
+										cd.data["enabled"] = val
+									end
+								end]]--
+							end,
+					},
 					showByDefault = {
 						name = "Show by Default",
 						desc = "If unselected you will need to manually enable each newly detected cooldown in order for them to show as bars/icons",
-						order = 202,
+						order = 202.1,
 						type = "toggle",
-						width = "full",
+						--width = "half",
 						hidden = function(info)
 								return CDTL2.currentFilterHidden["default"]
 							end,
@@ -465,10 +878,42 @@ function CDTL2:GetFilterOptions()
 								CDTL2.db.profile.global[string.lower(default)]["showByDefault"] = val
 							end,
 					},
-					spacer203 = {
+					useItemIcon = {
+						name = "Use Item Icon",
+						desc = "If selected the displayed icon will be the item icon\nOtherwise the spell icon will be used instead",
+						order = 202.1,
+						type = "toggle",
+						--width = "half",
+						hidden = function(info)
+								local default = string.lower(CDTL2.currentFilter["default"])
+								
+								if default == "items" or default == "icds" then
+									return false
+								end
+								
+								return true
+							end,
+						get = function(info, index)
+								local default = string.lower(CDTL2.currentFilter["default"])
+								if default == "items" or  default == "icds" then
+									return CDTL2.db.profile.global[default]["useItemIcon"]
+								end
+								
+								return nil
+							end,
+						set = function(info, val)
+								local default = string.lower(CDTL2.currentFilter["default"])
+								if default == "items" or  default == "icds" then
+									CDTL2.db.profile.global[default]["useItemIcon"] = val
+									CDTL2:RefreshAllIcons()
+									CDTL2:RefreshAllBars()
+								end
+							end,
+					},
+					spacer250 = {
 						name = "\n\n",
 						type = "description",
-						order = 203,
+						order = 250,
 						hidden = function(info)
 								return CDTL2.currentFilterHidden["default"]
 							end,
@@ -476,7 +921,7 @@ function CDTL2:GetFilterOptions()
 					ignoreThreshold = {
 						name = "Ignore Threshold",
 						desc = "Any cooldown/duration longer than this will be disabled by default\n",
-						order = 204,
+						order = 251,
 						type = "range",
 						softMin = 5,
 						softMax = 1800,
@@ -698,7 +1143,8 @@ function CDTL2:GetFilterOptions()
 			debuffs = private.GetFilterSet("debuffs", 400),
 			offensives = private.GetFilterSet("offensives", 500),
 			petspells = private.GetFilterSet("petspells", 600),
-			runes = private.GetFilterSet("runes", 700),
+			icds = private.GetFilterSet("icds", 700),
+			runes = private.GetFilterSet("runes", 800),
 		}
 	}
 	
@@ -711,6 +1157,7 @@ function CDTL2:GetLaneOptions()
 		type = "group",
 		childGroups  = "tab",
 		args = {
+			--global = private.GetGlobalSet("lane"),
 			lane1 = private.GetLaneSet(1),
 			lane2 = private.GetLaneSet(2),
 			lane3 = private.GetLaneSet(3),
@@ -748,6 +1195,31 @@ function CDTL2:GetBarFrameOptions()
 	}
 	
 	return options	
+end
+
+private.GetGlobalSet = function(t)
+	local options = {
+		name = "Global",
+		type = "group",
+		order = 100,
+		args = {
+			spacer100 = {
+				name = function(info)
+							return "Global "..t.." options\n\n"
+						end,
+				type = "description",
+				fontSize = "large",
+				order = 100,
+			},
+			spacer101 = {
+				name = "*WARNING*Making changes here will overide existing settings",
+				type = "description",
+				order = 101,
+			},
+		},
+	}
+
+	return options
 end
 
 private.GetBarFrameSet = function(i)
@@ -1299,6 +1771,7 @@ private.GetBarFrameSet = function(i)
 						desc = "Selects the texture",
 						order = 104,
 						type = "select",
+						width = 0.7,
 						dialogControl = 'LSM30_Statusbar',
 						values = AceGUIWidgetLSMlists.statusbar,
 						get = function(info, index)
@@ -1314,29 +1787,82 @@ private.GetBarFrameSet = function(i)
 						desc = "Sets the texture color",
 						order = 105,
 						type = "color",
+						width = 0.4,
 						hasAlpha = true,
+						disabled  = function(info)
+								if frame["bar"]["fgClassColor"] or frame["bar"]["fgSchoolColor"] then
+									return true
+								end
+								
+								return false
+							end,
 						get = function(info)
-								local r = frame["bar"]["fgTextureColor"]["r"]
+								--[[local r = frame["bar"]["fgTextureColor"]["r"]
 								local g = frame["bar"]["fgTextureColor"]["g"]
 								local b = frame["bar"]["fgTextureColor"]["b"]
 								local a = frame["bar"]["fgTextureColor"]["a"]
+								return r, g, b, a]]--
+								
+								local c = frame["bar"]["fgTextureColor"]
+								if frame["bar"]["fgClassColor"] then
+									c = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+								end
+						
+								local r = c["r"]
+								local g = c["g"]
+								local b = c["b"]
+								local a = c["a"]
 								return r, g, b, a
 							end,
 						set = function(info, red, green, blue, alpha)
 								frame["bar"]["fgTextureColor"] = { r = red, g = green, b = blue, a = alpha }
-								CDTL2:RefreshAllBars(i)
+								CDTL2:RefreshAllBars()
 							end,
 					},
-					spacer106 = {
+					--[[spacer106 = {
 						name = "",
 						type = "description",
 						order = 106,
+					},]]--
+					fgClassColor = {
+						name = "Class Color",
+						desc = "Set the texture color to your class color",
+						order = 107,
+						type = "toggle",
+						width = 0.5,
+						get = function(info)
+								return frame["bar"]["fgClassColor"]
+							end,
+						set = function(info, val)
+								frame["bar"]["fgClassColor"] = val
+								CDTL2:RefreshAllBars()
+							end,
+					},
+					--[[fgSchoolColor = {
+						name = "School Color",
+						desc = "Set the texture color to the spell/ability school color",
+						order = 108,
+						type = "toggle",
+						width = 0.5,
+						get = function(info)
+								return frame["bar"]["fgSchoolColor"]
+							end,
+						set = function(info, val)
+								frame["bar"]["fgSchoolColor"] = val
+								CDTL2:RefreshAllBars()
+							end,
+					},]]--
+					spacer109 = {
+						name = "",
+						type = "description",
+						order = 109,
 					},
 					bgTexture = {
 						name = "Background Texture",
 						desc = "Sets the background texture",
-						order = 107,
+						order = 110,
 						type = "select",
+						width = 0.7,
 						dialogControl = 'LSM30_Statusbar',
 						values = AceGUIWidgetLSMlists.statusbar,
 						get = function(info, index)
@@ -1350,14 +1876,27 @@ private.GetBarFrameSet = function(i)
 					bgTextureColor = {
 						name = "Color",
 						desc = "Sets the background texture color",
-						order = 108,
+						order = 111,
 						type = "color",
+						width = 0.4,
 						hasAlpha = true,
+						disabled  = function(info)
+								if frame["bar"]["bgClassColor"] or frame["bar"]["bgSchoolColor"] then
+									return true
+								end
+								
+								return false
+							end,
 						get = function(info)
-								local r = frame["bar"]["bgTextureColor"]["r"]
-								local g = frame["bar"]["bgTextureColor"]["g"]
-								local b = frame["bar"]["bgTextureColor"]["b"]
-								local a = frame["bar"]["bgTextureColor"]["a"]
+								local c = frame["bar"]["bgTextureColor"]
+								if frame["bar"]["bgClassColor"] then
+									c = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+								end
+						
+								local r = c["r"]
+								local g = c["g"]
+								local b = c["b"]
+								local a = c["a"]
 								return r, g, b, a
 							end,
 						set = function(info, red, green, blue, alpha)
@@ -1365,10 +1904,43 @@ private.GetBarFrameSet = function(i)
 								CDTL2:RefreshAllBars(i)
 							end,
 					},
-					spacer109 = {
+					--[[spacer112 = {
+						name = "",
+						type = "description",
+						order = 112,
+					},]]--
+					bgClassColor = {
+						name = "Class Color",
+						desc = "Set the texture color to your class color",
+						order = 113,
+						type = "toggle",
+						width = 0.5,
+						get = function(info)
+								return frame["bar"]["bgClassColor"]
+							end,
+						set = function(info, val)
+								frame["bar"]["bgClassColor"] = val
+								CDTL2:RefreshAllBars()
+							end,
+					},
+					--[[bgSchoolColor = {
+						name = "School Color",
+						desc = "Set the texture color to the spell/ability school color",
+						order = 114,
+						type = "toggle",
+						width = 0.5,
+						get = function(info)
+								return frame["bar"]["bgSchoolColor"]
+							end,
+						set = function(info, val)
+								frame["bar"]["bgSchoolColor"] = val
+								CDTL2:RefreshAllBars()
+							end,
+					},]]--
+					spacer115 = {
 						name = "\n\n",
 						type = "description",
-						order = 109,
+						order = 115,
 					},
 					textHeader = {
 						name = "Bar Text",
@@ -1571,32 +2143,86 @@ private.GetFilterSet = function(t, o)
 		order = o,
 		args = {
 			spacer100 = {
-				name = "\n\nSelect a cooldown to edit its settings\n",
+				name = "\n\nSelect something to edit its settings\n",
 				type = "description",
 				order = 100,
 			},
 			list = {
-				name = "",
-				desc = "",
+				name = function(info)
+						local n = ""
+						if t == "items" then
+							n = "By Spell"
+						end
+						return n
+					end,
+				desc = function(info)
+						local n = ""
+						if t == "items" then
+							n = "Select by spell name"
+						end
+						return n
+					end,
 				order = 101,
 				type = "select",
 				values = function(info)
-						local list = CDTL2:LoadFilterList(t)
+						local list = {}
+						if t == "icds" then
+							list = CDTL2:LoadFilterList(t, true)
+						else
+							list = CDTL2:LoadFilterList(t)
+						end
 						return list
 					end,
 				get = function(info)
-						return CDTL2.currentFilter[t]
+						local list = {}
+						if t == "icds" then
+							list = CDTL2:LoadFilterList(t, true)
+						else
+							list = CDTL2:LoadFilterList(t)
+						end
+						return list
 					end,
 				set = function(info, val)
-						local list = CDTL2:LoadFilterList(t)
+						local list = {}
+						if t == "icds" then
+							list = CDTL2:LoadFilterList(t, true)
+						else
+							list = CDTL2:LoadFilterList(t)
+						end
 						CDTL2.currentFilter[t] = list[val]
 						CDTL2.currentFilterHidden[t] = false
 					end,
 			},
+			--[[itemList = {
+				name = "By Item",
+				desc = "Select by item name",
+				order = 102,
+				type = "select",
+				hidden = function(info)
+						if t == "items" then
+							return false
+						end
+						
+						return true
+					end,
+				values = function(info)
+						local list = CDTL2:LoadFilterList(t, true)
+						return list
+					end,
+				get = function(info)
+						local list = CDTL2:LoadFilterList(t, true)
+						return list
+					end,
+				set = function(info, val)
+						local list = CDTL2:LoadFilterList(t, true)
+						CDTL2.currentFilter[t] = list[val]
+						CDTL2.currentFilterHidden[t] = false
+					end,
+			},]]--
 			hideIgnored = {
 				name = "Hide Ignored",
 				desc = "Stops ignored cooldowns from showing up in the list",
-				order = 102,
+				order = 103,
 				type = "toggle",
 				get = function(info, index)
 						return CDTL2.db.profile.global["hideIgnored"]
@@ -1605,29 +2231,144 @@ private.GetFilterSet = function(t, o)
 						CDTL2.db.profile.global["hideIgnored"] = val
 					end,
 			},
-			spacer200 = {
+			spacer199 = {
 				name = "*Spells will show up here once they have been detected at least once*\n\n\n",
 				type = "description",
+				order = 199,
+			},
+			spacer200 = {
+				name = function(info)
+						local n = "Item:   "
+						
+						return n
+					end,
+				type = "description",
 				order = 200,
+				width = 0.2,
+				hidden = function(info)
+						if not CDTL2.currentFilterHidden[t] then
+							if t == "icds" or t == "items" then
+								return false
+							end
+						end
+						
+						return true
+					end,
 			},
 			spacer201 = {
 				name = function(info)
-						local s = ""
-						
-						if CDTL2.currentFilter[t] then
-							s = CDTL2.currentFilter[t]
+						local n = ""
+						if t == "icds" or t == "items" then
+							local specialCase = false
+							if t == "icds" then
+								specialCase = true
+							end
+							local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
+							
+							if CDTL2.currentFilter[t] then
+								if s then
+									n = "  "..s["link"]
+								else
+									n = CDTL2.currentFilter[t]
+								end
+							end
 						end
 						
-						return s
+						return n
 					end,
 				type = "description",
 				order = 201,
+				width = 1.5,
+				fontSize = "large",
+				hidden = function(info)
+						if not CDTL2.currentFilterHidden[t] then
+							if t == "icds" or t == "items" then
+								return false
+							end
+						end
+						
+						return true
+					end,
+				image = function(info)
+					local specialCase = false
+						if t == "icds" or t == "items" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
+					
+					if s then
+						return s["itemIcon"]
+					else
+						return 134400
+					end
+				end,
+				imageWidth = 24,
+				imageHeight = 24,
+				imageCoords = {0.1,0.9,0.1,0.9},
+			},
+			spacer202 = {
+				name = "",
+				type = "description",
+				order = 202,
+			},
+			spacer203 = {
+				name = function(info)
+						local n = ""
+						
+						if t == "spells" or t == "items" or t == "petspells" then
+							n = "Spell:   "
+						elseif t == "buffs" or t == "debuffs" or t == "offensives" then
+							n = "Aura:   "
+						elseif t == "runes" then
+							n = "Rune:   "
+						elseif t == "icds" then
+							n = "Proc:   "
+						end
+						
+						return n
+					end,
+				type = "description",
+				order = 203,
+				width = 0.2,
+				hidden = function(info)
+						return CDTL2.currentFilterHidden[t]
+					end,
+			},
+			spacer204 = {
+				name = function(info)
+						local n = ""
+						local specialCase = false
+						if t == "icds" or t == "items" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
+						
+						if CDTL2.currentFilter[t] then
+							if s then
+								n = "  "..s["name"]
+								if t == "icds" then
+									n = n.." ("..s["trigger"]..")"
+								end
+							else
+								n = CDTL2.currentFilter[t]
+							end
+						end
+						
+						return n
+					end,
+				type = "description",
+				order = 204,
+				width = 1.5,
 				fontSize = "large",
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
 				image = function(info)
-					local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+					local specialCase = false
+						if t == "icds" or t == "items" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 					
 					if s then
 						return s["icon"]
@@ -1639,33 +2380,60 @@ private.GetFilterSet = function(t, o)
 				imageHeight = 24,
 				imageCoords = {0.1,0.9,0.1,0.9},
 			},
-			spacer202 = {
+			spacer300 = {
+				name = "\n\n",
+				type = "description",
+				order = 300,
+				width = "full",
+			},
+			spacer301 = {
 				name = function(info)
-						local n = "\n\n"
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+						local n = ""
 						
-						if s then
-							n =	n.."Cooldown: "..(s["bCD"] / 1000).." sec\n"
-							
-							if t == "items" and s["link"] then
-								
-								n =	n.."From Item: "..s["link"].."\n"
-							end
+						if t == "spells" or t == "items" or t == "petspells" then
+							n = "Cooldown:"
+						elseif t == "buffs" or t == "debuffs" or t == "offensives" then
+							n = "Duration:"
+						elseif t == "runes" then
+							n = "Recharge:"
+						elseif t == "icds" then
+							n = "Internal CD:"
 						end
 						
 						return n
 					end,
 				type = "description",
-				order = 202,
+				order = 301,
+				width = 0.3,
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
-				fontSize = "medium",
 			},
-			spacer203 = {
+			spacer302 = {
+				name = function(info)
+						local n = ""
+						local specialCase = false
+						if t == "icds" or t == "items" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
+						
+						if s then
+							n =	n.."  "..(s["bCD"] / 1000).." sec\n"
+						end
+						
+						return n
+					end,
+				type = "description",
+				order = 302,
+				width = 1.5,
+				fontSize = "large",
+			},
+			spacer400 = {
 				name = "\n\n",
 				type = "description",
-				order = 203,
+				order = 400,
+				width = "full",
 			},
 			clearIndividualSetting = {
 				name = "Clear Individual Settings",
@@ -1679,7 +2447,7 @@ private.GetFilterSet = function(t, o)
 						return "This will clear cooldown settings for "..s
 					end,
 				confirm = true,
-				order = 204,
+				order = 401,
 				type = "execute",
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
@@ -1693,7 +2461,7 @@ private.GetFilterSet = function(t, o)
 						
 						local index = nil
 						for k, spell in pairs(CDTL2.db.profile.tables[t]) do
-							if spell["name"] == s then
+							if spell["itemName"] == s then
 								index = k
 							end
 						end
@@ -1705,26 +2473,30 @@ private.GetFilterSet = function(t, o)
 						CDTL2.currentFilter[t] = ""
 						CDTL2.currentFilterHidden[t] = true
 					end,
-			},			
-			spacer300 = {
+			},
+			spacer500 = {
 				name = "\n\n",
 				type = "description",
-				order = 300,
+				order = 500,
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
 			},
 			enabled = {
-				name = "Enabled - Untick this to never show this as an icon/bar",
-				desc = "",
-				order = 301,
+				name = "Enabled",
+				desc = "Untick this to never show this as an icon/bar",
+				order = 501,
 				type = "toggle",
-				width = "full",
+				width = "half",
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
 				get = function(info, index)
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+						local specialCase = false
+						if t == "icds" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 						
 						if s then
 							return s["enabled"]
@@ -1743,26 +2515,22 @@ private.GetFilterSet = function(t, o)
 							CDTL2:RefreshBar(s)
 						end
 					end,
-			},					
-			spacer400 = {
-				name = "\n\n",
-				type = "description",
-				order = 400,
-				hidden = function(info)
-						return CDTL2.currentFilterHidden[t]
-					end,
 			},
 			highlight = {
-				name = "Highlight - Tick to apply highlighting to the icon",
-				desc = "",
-				order = 401,
+				name = "Highlight",
+				desc = "Tick to apply highlighting to the icon",
+				order = 502,
 				type = "toggle",
-				width = "full",
+				width = "half",
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
 				get = function(info, index)
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+						local specialCase = false
+						if t == "icds" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 						
 						if s then
 							return s["highlight"]
@@ -1782,16 +2550,20 @@ private.GetFilterSet = function(t, o)
 					end,
 			},
 			pinned = {
-				name = "Pinned - Tick to keep an icon in the ready frame until the cooldownis used again",
-				desc = "",
-				order = 402,
+				name = "Pinned",
+				desc = "Tick to keep an icon in the ready frame until the cooldownis used again",
+				order = 503,
 				type = "toggle",
-				width = "full",
+				width = "half",
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
 				get = function(info, index)
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+						local specialCase = false
+						if t == "icds" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 						
 						if s then
 							return s["pinned"]
@@ -1810,10 +2582,10 @@ private.GetFilterSet = function(t, o)
 						end
 					end,
 			},
-			spacer500 = {
-				name = "\n\nSelect the frame the icon/bar will be shown\nIf a the selected frame is not enabled, the icon/bar will not appear\n\n",
+			spacer600 = {
+				name = "\n\nSelect the frame the icon/bar will be shown\nIf the selected frame is not enabled, the icon/bar will not appear\n\n",
 				type = "description",
-				order = 500,
+				order = 600,
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
@@ -1821,7 +2593,7 @@ private.GetFilterSet = function(t, o)
 			lane = {
 				name = "Lane",
 				desc = "",
-				order = 501,
+				order = 601,
 				type = "select",
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
@@ -1829,7 +2601,11 @@ private.GetFilterSet = function(t, o)
 				width = "half",
 				values = { [0] = "Hide", [1] = "1", [2] = "2", [3] = "3" },
 				get = function(info)
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+						local specialCase = false
+						if t == "icds" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 						
 						if s then
 							return s["lane"]
@@ -1851,7 +2627,7 @@ private.GetFilterSet = function(t, o)
 			barFrame = {
 				name = "Bar Frame",
 				desc = "",
-				order = 502,
+				order = 602,
 				type = "select",
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
@@ -1859,7 +2635,11 @@ private.GetFilterSet = function(t, o)
 				width = "half",
 				values = { [0] = "Hide", [1] = "1", [2] = "2", [3] = "3" },
 				get = function(info)
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+						local specialCase = false
+						if t == "icds" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 						
 						if s then
 							return s["barFrame"]
@@ -1881,7 +2661,7 @@ private.GetFilterSet = function(t, o)
 			readyFrame = {
 				name = "Ready Frame",
 				desc = "",
-				order = 503,
+				order = 603,
 				hidden = function(info)
 						return CDTL2.currentFilterHidden[t]
 					end,
@@ -1889,7 +2669,11 @@ private.GetFilterSet = function(t, o)
 				width = "half",
 				values = { [0] = "Hide", [1] = "1", [2] = "2", [3] = "3" },
 				get = function(info)
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t)
+						local specialCase = false
+						if t == "icds" then
+							specialCase = true
+						end
+						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 						
 						if s then
 							return s["readyFrame"]
@@ -1907,7 +2691,7 @@ private.GetFilterSet = function(t, o)
 							CDTL2:SendToReady(s)
 						end
 					end,
-			},
+			},			
 		},
 	}
 	
@@ -2880,6 +3664,7 @@ private.GetLaneSet = function(i)
 						desc = "Selects the texture",
 						order = 501,
 						type = "select",
+						width = 0.7,
 						dialogControl = 'LSM30_Statusbar',
 						values = AceGUIWidgetLSMlists.statusbar,
 						get = function(info, index)
@@ -2895,17 +3680,43 @@ private.GetLaneSet = function(i)
 						desc = "Sets the texture color",
 						order = 502,
 						type = "color",
+						width = 0.4,
 						hasAlpha = true,
+						disabled  = function(info)
+								return lane["fgClassColor"]
+							end,
 						get = function(info)
-								local r = lane["fgTextureColor"]["r"]
-								local g = lane["fgTextureColor"]["g"]
-								local b = lane["fgTextureColor"]["b"]
-								local a = lane["fgTextureColor"]["a"]
+								local c = lane["fgTextureColor"]
+								if lane["fgClassColor"] then
+									c = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+								end
+						
+								local r = c["r"]
+								local g = c["g"]
+								local b = c["b"]
+								local a = c["a"]
 								return r, g, b, a
 							end,
 						set = function(info, red, green, blue, alpha)
 								lane["fgTextureColor"] = { r = red, g = green, b = blue, a = alpha }
 								CDTL2:RefreshLane(i)
+							end,
+					},
+					fgClassColor = {
+						name = "Class Color",
+						desc = "Set the texture color to your class color",
+						order = 503,
+						type = "toggle",
+						width = 0.5,
+						get = function(info)
+								return lane["fgClassColor"]
+							end,
+						set = function(info, val)
+								lane["fgClassColor"] = val
+								--if val then
+									--lane["fgTextureColor"] = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+									CDTL2:RefreshLane(i)
+								--end
 							end,
 					},
 					spacer600 = {
@@ -2918,6 +3729,7 @@ private.GetLaneSet = function(i)
 						desc = "Sets the background texture",
 						order = 601,
 						type = "select",
+						width = 0.7,
 						dialogControl = 'LSM30_Statusbar',
 						values = AceGUIWidgetLSMlists.statusbar,
 						get = function(info, index)
@@ -2933,12 +3745,21 @@ private.GetLaneSet = function(i)
 						desc = "Sets the background texture color",
 						order = 602,
 						type = "color",
+						width = 0.4,
 						hasAlpha = true,
+						disabled  = function(info)
+								return lane["fgClassColor"]
+							end,
 						get = function(info)
-								local r = lane["bgTextureColor"]["r"]
-								local g = lane["bgTextureColor"]["g"]
-								local b = lane["bgTextureColor"]["b"]
-								local a = lane["bgTextureColor"]["a"]
+								local c = lane["bgTextureColor"]
+								if lane["bgClassColor"] then
+									c = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+								end
+						
+								local r = c["r"]
+								local g = c["g"]
+								local b = c["b"]
+								local a = c["a"]
 								return r, g, b, a
 							end,
 						set = function(info, red, green, blue, alpha)
@@ -2946,15 +3767,32 @@ private.GetLaneSet = function(i)
 								CDTL2:RefreshLane(i)
 							end,
 					},
-					spacer603 = {
+					bgClassColor = {
+						name = "Class Color",
+						desc = "Set the texture color to your class color",
+						order = 603,
+						type = "toggle",
+						width = 0.5,
+						get = function(info)
+								return lane["bgClassColor"]
+							end,
+						set = function(info, val)
+								lane["bgClassColor"] = val
+								--if val then
+									--lane["fgTextureColor"] = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+									CDTL2:RefreshLane(i)
+								--end
+							end,
+					},
+					spacer700 = {
 						name = "",
 						type = "description",
-						order = 603,
+						order = 700,
 					},
 					laneAlpha = {
 						name = "Lane Alpha",
 						desc = "Set the alpha for the lane (this will reset custom text alpha settings, but they can be adjusted again after setting this)",
-						order = 604,
+						order = 701,
 						type = "range",
 						min = 0,
 						max = 1,
@@ -2966,15 +3804,15 @@ private.GetLaneSet = function(i)
 								CDTL2:RefreshLane(i)
 						end,
 					},
-					spacer700 = {
+					spacer702 = {
 						name = "\n\n",
 						type = "description",
-						order = 700,
+						order = 702,
 					},
 					border = {
 						name = "                    Border Texture",
 						desc = "Selects the border texture",
-						order = 701,
+						order = 703,
 						type = "select",
 						dialogControl = 'LSM30_Border',
 						values = AceGUIWidgetLSMlists.border,
@@ -2987,7 +3825,7 @@ private.GetLaneSet = function(i)
 					borderColor = {
 						name = "Color",
 						desc = "Selects the border color",
-						order = 702,
+						order = 704,
 						type = "color",
 						hasAlpha = true,
 						get = function(info)

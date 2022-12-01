@@ -10,8 +10,8 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.6
-CDTL2.noticeVersion = 1.5
+CDTL2.version = 1.7
+CDTL2.noticeVersion = 1.7
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
 CDTL2.barFrames = {}
@@ -26,6 +26,7 @@ CDTL2.tracking = {
 	rSwingTime = -1,
 }
 CDTL2.spellData = {}
+CDTL2.icdData = {}
 CDTL2.colors = {
 	bg = {},
 	db = { r = 0.1, g = 0.1, b = 0.1, a = 0.85 },
@@ -58,6 +59,30 @@ local defaults = {
 			enabledGroup = false,
 			enabledInstance = false,
 			
+			classColors = {
+				DEATHKNIGHT = RAID_CLASS_COLORS.DEATHKNIGHT,
+				DRUID = RAID_CLASS_COLORS.DRUID,
+				HUNTER = RAID_CLASS_COLORS.HUNTER,
+				MAGE = RAID_CLASS_COLORS.MAGE,
+				PALADIN = RAID_CLASS_COLORS.PALADIN,
+				PRIEST = RAID_CLASS_COLORS.PRIEST,
+				ROGUE = RAID_CLASS_COLORS.ROGUE,
+				SHAMAN = RAID_CLASS_COLORS.SHAMAN,
+				WARLOCK = RAID_CLASS_COLORS.WARLOCK,
+				WARRIOR = RAID_CLASS_COLORS.WARRIOR,
+			},
+			
+			schoolColors = {
+				Physical = { r = 1, g = 1, b = 0, a = 1 },
+				Holy = { r = 1, g = 0.90196, b = 0.5, a = 1 },
+				Fire = { r = 1, g = 0.5, b = 0, a = 1 },
+				Nature = { r = 0.30196, g = 1, b = 0.30196, a = 1 },
+				Frost = { r = 0.5, g = 1, b = 1, a = 1 },
+				Shadow = { r = 0.5, g = 0.5, b = 1, a = 1 },
+				Arcane = { r = 1, g = 0.5, b = 1, a = 1 },
+				Other = { r = 0.8, g = 0.8, b = 0.8, a = 1 },
+			},
+			
 			spells = {
 				enabled = true,
 				showByDefault = true,
@@ -74,6 +99,7 @@ local defaults = {
 				defaultLane = 1,
 				defaultReady = 1,
 				defaultBar = 1,
+				useItemIcon = true,
 			},
 			
 			buffs = {
@@ -83,6 +109,7 @@ local defaults = {
 				defaultLane = 2,
 				defaultReady = 2,
 				defaultBar = 2,
+				onlyPlayer = true,
 			},
 			
 			debuffs = {
@@ -92,6 +119,7 @@ local defaults = {
 				defaultLane = 3,
 				defaultReady = 3,
 				defaultBar = 3,
+				onlyPlayer = true,
 			},
 			
 			offensives = {
@@ -119,6 +147,16 @@ local defaults = {
 				defaultLane = 1,
 				defaultReady = 1,
 				defaultBar = 1,
+			},
+			
+			icds = {
+				enabled = true,
+				showByDefault = true,
+				ignoreThreshold = 3600,
+				defaultLane = 1,
+				defaultReady = 1,
+				defaultBar = 1,
+				useItemIcon = true,
 			},
 		},
 	
@@ -164,8 +202,10 @@ local defaults = {
 				
 				fgTexture = "CDTL2 Smooth",
 				fgTextureColor = { r = 0.77647, g = 0.11765, b = 0.28235, a = 1 },
+				fgClassColor = true,
 				bgTexture = "CDTL2 Smooth",
 				bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
+				bgClassColor = false,
 				
 				border = {
 					style = "CDTL2 Shadow",
@@ -533,8 +573,10 @@ local defaults = {
 				
 				fgTexture = "CDTL2 Smooth",
 				fgTextureColor = { r = 0.52941, g = 0.77647, b = 0.24314, a = 1 },
+				fgClassColor = true,
 				bgTexture = "CDTL2 Smooth",
 				bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
+				bgClassColor = false,
 				
 				border = {
 					style = "CDTL2 Shadow",
@@ -899,8 +941,10 @@ local defaults = {
 				
 				fgTexture = "CDTL2 Smooth",
 				fgTextureColor = { r = 0.15294, g = 0.63922, b = 0.77647, a = 1 },
+				fgClassColor = true,
 				bgTexture = "CDTL2 Smooth",
 				bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
+				bgClassColor = false,
 				
 				border = {
 					style = "CDTL2 Shadow",
@@ -1275,9 +1319,13 @@ local defaults = {
 					yPadding = 0,
 				
 					fgTexture = "CDTL2 Smooth",
-					fgTextureColor = { r = 0.77647, g = 0.11765, b = 0.28235, a = 1 },
+					fgTextureColor = { r = 0.77647, g = 0.11765, b = 0.28235, a = 1 },	
+					fgClassColor = false,
+					fgSchoolColor = false,
 					bgTexture = "CDTL2 Smooth",
 					bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
+					bgClassColor = false,
+					bgSchoolColor = false,
 					
 					border = {
 						style = "None",
@@ -1393,9 +1441,13 @@ local defaults = {
 					yPadding = 0,
 				
 					fgTexture = "CDTL2 Smooth",
-					fgTextureColor = { r = 0.52941, g = 0.77647, b = 0.24314, a = 1 },
+					fgTextureColor = { r = 0.52941, g = 0.77647, b = 0.24314, a = 1 },	
+					fgClassColor = false,
+					fgSchoolColor = false,
 					bgTexture = "CDTL2 Smooth",
 					bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
+					bgClassColor = false,
+					bgSchoolColor = false,
 					
 					border = {
 						style = "None",
@@ -1512,8 +1564,12 @@ local defaults = {
 				
 					fgTexture = "CDTL2 Smooth",
 					fgTextureColor = { r = 0.15294, g = 0.63922, b = 0.77647, a = 1 },
+					fgClassColor = false,
+					fgSchoolColor = false,
 					bgTexture = "CDTL2 Smooth",
 					bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
+					bgClassColor = false,
+					bgSchoolColor = false,
 					
 					border = {
 						style = "None",
@@ -1954,27 +2010,14 @@ local defaults = {
 		},
 		
 		tables = {
-			spells = {
-				
-			},
-			petspells = {
-				
-			},
-			items = {
-				
-			},
-			buffs = {
-				
-			},
-			debuffs = {
-				
-			},
-			offensives = {
-				
-			},
-			runes = {
-				
-			},
+			spells = {},
+			petspells = {},
+			items = {},
+			buffs = {},
+			debuffs = {},
+			offensives = {},
+			runes = {},
+			icds = {},
 		},
 	}
 }
@@ -2045,6 +2088,10 @@ function CDTL2:OnEnable()
 		if CDTL2.player["class"] == "DEATHKNIGHT" then
 			self:RegisterEvent("RUNE_POWER_UPDATE")
 		end
+		
+		CDTL2:RefreshLane(1)
+		CDTL2:RefreshLane(2)
+		CDTL2:RefreshLane(3)
 	end)
 	
 	if CDTL2.db.profile.global["firstRun"] or CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
@@ -2214,11 +2261,13 @@ private.CreateFirstRunFrame = function()
 	
 	if CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
 		text = text.."\n\n\n"
-		text = text.."This latest version contains many changes\n"
-		text = text.."that should greatly improve performance.\n\n"
-		text = text.."Everything should function just as before,\n"
-		text = text.."but if you notice something isn't quite right,\n"
-		text = text.."please feel free to let me know via Curse"
+		text = text.."This new version adds initial support for ICDs.\n"
+		text = text.."For now only epic WotLK trinkets are supported.\n"
+		text = text.."More items with ICDs will be added in time.\n\n"
+		text = text.."It also adds in some intital changes to items\n"
+		text = text.."that will be expanded in future releases.  So\n"
+		text = text.."this may mean some settings need to be reset.\n"
+		text = text.."You can do this via the filters section.\n"
 	end
 	
 	text = text.."\n\n"
@@ -2360,74 +2409,93 @@ function CDTL2:COMBAT_LOG_EVENT_UNFILTERED()
 			local spellID, spellName, _, auraType, _, _, _, _, _, _, _, _, _ = select(12, CombatLogGetCurrentEventInfo())
 			auraType = auraType:lower().."s"
 			
+			--CDTL2:Print(destGUID)
+			
 			if CDTL2.db.profile.global["debugMode"] then
 				CDTL2:Print("AURA APPLIED: "..spellID.." - "..spellName.." - "..auraType.." - "..tostring(sourceName).." - "..destName)
 			end
 			
+			CDTL2:CheckForICD(spellID)
+			
 			-- PLAYER AURAS
 			if destGUID == CDTL2.player["guid"] then
-				local s = CDTL2:GetSpellSettings(spellName, auraType)
-				if s then
-					if not s["ignored"] then
-						local ef = CDTL2:GetExistingCooldown(s["name"], auraType)
-						if ef then
-							CDTL2:SendToLane(ef)
-							CDTL2:SendToBarFrame(ef)
-						else
-							if CDTL2.db.profile.global["buffs"]["enabled"] and auraType == "buffs" then
-								CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
-								if not CDTL2:IsUsedBy("buffs", spellID) then
-									CDTL2:AddUsedBy("buffs", spellID, CDTL2.player["guid"])
-								end
-							elseif CDTL2.db.profile.global["debuffs"]["enabled"] and auraType == "debuffs" then
-								CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
-								if not CDTL2:IsUsedBy("debuffs", spellID) then
-									CDTL2:AddUsedBy("debuffs", spellID, CDTL2.player["guid"])
+				local validSource = false
+				if sourceGUID == CDTL2.player["guid"] then
+					validSource = true
+				else
+					if auraType == "buffs" and not CDTL2.db.profile.global["buffs"]["onlyPlayer"] then
+						validSource = true
+					end
+					
+					if auraType == "debuffs" and not CDTL2.db.profile.global["debuffs"]["onlyPlayer"] then
+						validSource = true
+					end
+				end
+				
+				if validSource then
+					local s = CDTL2:GetSpellSettings(spellName, auraType)
+					if s then
+						if not s["ignored"] then
+							local ef = CDTL2:GetExistingCooldown(s["name"], auraType)
+							if ef then
+								CDTL2:SendToLane(ef)
+								CDTL2:SendToBarFrame(ef)
+							else
+								if CDTL2.db.profile.global["buffs"]["enabled"] and auraType == "buffs"  then
+									CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
+									if not CDTL2:IsUsedBy("buffs", spellID) then
+										CDTL2:AddUsedBy("buffs", spellID, CDTL2.player["guid"])
+									end
+								elseif CDTL2.db.profile.global["debuffs"]["enabled"] and auraType == "debuffs" then
+									CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
+									if not CDTL2:IsUsedBy("debuffs", spellID) then
+										CDTL2:AddUsedBy("debuffs", spellID, CDTL2.player["guid"])
+									end
 								end
 							end
 						end
-					end
-				else
-					s = CDTL2:AuraExists("player", spellName)
-					if s then
-						s["highlight"] = false
-						s["pinned"] = false
-						
-						s["usedBy"] = { CDTL2.player["guid"] }
-						
-						local ignoreThreshold = 0
-						local link, _ = GetSpellLink(spellID)
-						s["link"] = link
-						
-						if auraType == "buffs" then
-							ignoreThreshold = CDTL2.db.profile.global["buffs"]["ignoreThreshold"]
+					else
+						s = CDTL2:AuraExists("player", spellName)
+						if s then
+							s["highlight"] = false
+							s["pinned"] = false
 							
-							s["enabled"] = CDTL2.db.profile.global["buffs"]["showByDefault"]
-							s["lane"] = CDTL2.db.profile.global["buffs"]["defaultLane"]
-							s["barFrame"] = CDTL2.db.profile.global["buffs"]["defaultBar"]
-							s["readyFrame"] = CDTL2.db.profile.global["buffs"]["defaultReady"]
-						elseif auraType == "debuffs" then
-							ignoreThreshold = CDTL2.db.profile.global["debuffs"]["ignoreThreshold"]
+							s["usedBy"] = { CDTL2.player["guid"] }
 							
-							s["enabled"] = CDTL2.db.profile.global["debuffs"]["showByDefault"]
-							s["lane"] = CDTL2.db.profile.global["debuffs"]["defaultLane"]
-							s["barFrame"] = CDTL2.db.profile.global["debuffs"]["defaultBar"]
-							s["readyFrame"] = CDTL2.db.profile.global["debuffs"]["defaultReady"]
-						end
-						
-						if s["bCD"] / 1000 > 3 and s["bCD"] / 1000 <= ignoreThreshold then
-							s["ignored"] = false
-						else
-							s["ignored"] = true
-						end
+							local ignoreThreshold = 0
+							local link, _ = GetSpellLink(spellID)
+							s["link"] = link
+							
+							if auraType == "buffs" then
+								ignoreThreshold = CDTL2.db.profile.global["buffs"]["ignoreThreshold"]
+								
+								s["enabled"] = CDTL2.db.profile.global["buffs"]["showByDefault"]
+								s["lane"] = CDTL2.db.profile.global["buffs"]["defaultLane"]
+								s["barFrame"] = CDTL2.db.profile.global["buffs"]["defaultBar"]
+								s["readyFrame"] = CDTL2.db.profile.global["buffs"]["defaultReady"]
+							elseif auraType == "debuffs" then
+								ignoreThreshold = CDTL2.db.profile.global["debuffs"]["ignoreThreshold"]
+								
+								s["enabled"] = CDTL2.db.profile.global["debuffs"]["showByDefault"]
+								s["lane"] = CDTL2.db.profile.global["debuffs"]["defaultLane"]
+								s["barFrame"] = CDTL2.db.profile.global["debuffs"]["defaultBar"]
+								s["readyFrame"] = CDTL2.db.profile.global["debuffs"]["defaultReady"]
+							end
+							
+							if s["bCD"] / 1000 > 3 and s["bCD"] / 1000 <= ignoreThreshold then
+								s["ignored"] = false
+							else
+								s["ignored"] = true
+							end
 
-						table.insert(CDTL2.db.profile.tables[auraType], s)
-						
-						if not s["ignored"] then
-							if CDTL2.db.profile.global["buffs"]["enabled"] and auraType == "buffs" then
-								CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
-							elseif CDTL2.db.profile.global["debuffs"]["enabled"] and auraType == "debuffs" then
-								CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
+							table.insert(CDTL2.db.profile.tables[auraType], s)
+							
+							if not s["ignored"] then
+								if CDTL2.db.profile.global["buffs"]["enabled"] and auraType == "buffs" then
+									CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
+								elseif CDTL2.db.profile.global["debuffs"]["enabled"] and auraType == "debuffs" then
+									CDTL2:CreateCooldown(CDTL2:GetUID(),auraType , s)
+								end
 							end
 						end
 					end
@@ -2479,11 +2547,15 @@ function CDTL2:COMBAT_LOG_EVENT_UNFILTERED()
 								--CDTL2:RefreshBar(rcd)
 								--CDTL2:RefreshIcon(rcd)
 							else
-								s["targetID"] = destGUID
-								s["targetName"] = destName
+								--s["targetID"] = destGUID
+								--s["targetName"] = destName
 								
 								if CDTL2.db.profile.global["offensives"]["enabled"] then
-									CDTL2:CreateCooldown(CDTL2:GetUID(),"offensives" , s)
+									local ncd = CDTL2:CreateCooldown(CDTL2:GetUID(),"offensives" , s)
+									
+									ncd.data["targetID"] = destGUID
+									ncd.data["targetName"] = destName
+									
 									if not CDTL2:IsUsedBy("offensives", spellID) then
 										CDTL2:AddUsedBy("offensives", spellID, CDTL2.player["guid"])
 									end
@@ -2517,10 +2589,13 @@ function CDTL2:COMBAT_LOG_EVENT_UNFILTERED()
 					table.insert(CDTL2.db.profile.tables["offensives"], s)
 										
 					if CDTL2.db.profile.global["offensives"]["enabled"] then
-						s["targetID"] = destGUID
-						s["targetName"] = destName
+						--s["targetID"] = destGUID
+						--s["targetName"] = destName
 						
-						CDTL2:CreateCooldown(CDTL2:GetUID(),"offensives" , s)
+						local ncd = CDTL2:CreateCooldown(CDTL2:GetUID(),"offensives" , s)
+						
+						ncd.data["targetID"] = destGUID
+						ncd.data["targetName"] = destName
 					end
 				end
 			end
@@ -2583,7 +2658,7 @@ function CDTL2:COMBAT_LOG_EVENT_UNFILTERED()
 end
 
 function CDTL2:UNIT_SPELLCAST_SUCCEEDED(...)
-	local _, unitTarget, castGUID, spellID = ...
+	local temp, unitTarget, castGUID, spellID = ...
 	
 	-- Spell ID 836 is a spell that gets cast on login
 	if unitTarget == "player" and spellID ~= 836 then
@@ -2658,7 +2733,7 @@ function CDTL2:UNIT_SPELLCAST_SUCCEEDED(...)
 				end
 			else
 				-- ITEM SPELLS
-				local s = CDTL2:GetSpellSettings(spellName, "items", spellID)				
+				local s = CDTL2:GetSpellSettings(spellName, "items", false, spellID)				
 				if s then
 					if not s["ignored"] then
 						local ef = CDTL2:GetExistingCooldown(s["name"], "items")
@@ -2763,7 +2838,7 @@ function CDTL2:ITEM_LOCK_CHANGED(...)
 			local spellName, spellID = GetItemSpell(itemId)
 			
 			if spellID then
-				local s = CDTL2:GetSpellSettings(spellName, "items", spellID)
+				local s = CDTL2:GetSpellSettings(spellName, "items", false, spellID)
 				if s then
 					if not s["ignored"] then
 						local ef = CDTL2:GetExistingCooldown(s["name"], "items")

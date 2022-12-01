@@ -49,8 +49,33 @@ function CDTL2:CreateCooldown(UID, cdType, cdData)
 		overrideCD = false,
 	}
 	
+	if cdData["school"] then
+		f.data["school"] = cdData["school"]
+	end
+	
 	if cdData["runeIndex"] then
 		f.data["runeIndex"] = cdData["runeIndex"]
+	end
+	
+	if cdType == "items" or cdType == "icds" then
+		if cdData["itemIcon"] then
+			f.data["itemIcon"] = cdData["itemIcon"]
+		else
+			local _, _, icon, _, _, _, _ = GetSpellInfo(f.data["id"])
+			f.data["icon"] = icon
+			
+			local item = Item:CreateFromItemID(f.data["itemID"])
+			item:ContinueOnItemLoad(function()
+				f.data["itemIcon"] = item:GetItemIcon()
+				
+				CDTL2:SetSpellData(f.data["name"], cdType, "icon", f.data["icon"])
+				CDTL2:SetSpellData(f.data["name"], cdType, "itemIcon", f.data["itemIcon"])
+			end)
+		end
+	end
+	
+	if cdData["trigger"] then
+		f.data["trigger"] = cdData["trigger"]
 	end
 	
 	-- ON UPDATE
@@ -177,7 +202,13 @@ function CDTL2:RefreshBar(cd)
 		f.icon:SetHeight(s["height"])
 		
 		f.icon.tx:SetAllPoints(f.icon)
-		f.icon.tx:SetTexture(cd.data["icon"])
+		
+		local icon = cd.data["icon"]
+		--if cd.data["type"] == "icds" then
+		if CDTL2.db.profile.global[cd.data["type"]]["useItemIcon"] then
+			icon = cd.data["itemIcon"]
+		end
+		f.icon.tx:SetTexture(icon)
 		
 		local zoom = CDTL2.db.profile.global["zoom"]
 		local tl = zoom - 1
@@ -219,21 +250,56 @@ function CDTL2:RefreshBar(cd)
 	f.bar:SetStatusBarTexture(CDTL2.LSM:Fetch("statusbar", s["bar"]["fgTexture"]))
 	f.bar:GetStatusBarTexture():SetHorizTile(false)
 	f.bar:GetStatusBarTexture():SetVertTile(false)
-	f.bar:SetStatusBarColor(
+	--[[f.bar:SetStatusBarColor(
 		s["bar"]["fgTextureColor"]["r"],
 		s["bar"]["fgTextureColor"]["g"],
 		s["bar"]["fgTextureColor"]["b"],
 		s["bar"]["fgTextureColor"]["a"]
+	)]]--
+	
+	local fgColor = s["bar"]["fgTextureColor"]
+	if s["bar"]["fgSchoolColor"] then
+		local schoolColor = CDTL2.db.profile.global["schoolColors"]["Other"]
+		if cd.data["school"] then
+			schoolColor = CDTL2.db.profile.global["schoolColors"][cd.data["school"]]
+		end
+		
+		fgColor = schoolColor
+	elseif CDTL2.player["class"] then
+		if s["bar"]["fgClassColor"] then
+			fgColor = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+		end
+	end
+	
+	f.bar:SetStatusBarColor(
+		fgColor["r"],
+		fgColor["g"],
+		fgColor["b"],
+		fgColor["a"]
 	)
 	
 	-- BACKGROUND
 	f.bar.bg:SetTexture(CDTL2.LSM:Fetch("statusbar", s["bar"]["bgTexture"]))
 	f.bar.bg:SetAllPoints(true)
-	f.bar.bg:SetVertexColor(
+	--[[f.bar.bg:SetVertexColor(
 		s["bar"]["bgTextureColor"]["r"],
 		s["bar"]["bgTextureColor"]["g"],
 		s["bar"]["bgTextureColor"]["b"],
 		s["bar"]["bgTextureColor"]["a"]
+	)]]--
+	
+	local bgColor = s["bar"]["bgTextureColor"]
+	if CDTL2.player["class"] then
+		if s["bar"]["bgClassColor"] then
+			bgColor = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+		end
+	end
+	
+	f.bar.bg:SetVertexColor(
+		bgColor["r"],
+		bgColor["g"],
+		bgColor["b"],
+		bgColor["a"]
 	)
 		
 	-- TEXT
@@ -455,8 +521,13 @@ function CDTL2:RefreshIcon(cd)
 	f:SetSize(s["icons"]["size"], s["icons"]["size"])
 	
 	-- Set the icon texture
+	local icon = cd.data["icon"]
+	--if cd.data["type"] == "icds" then
+	if CDTL2.db.profile.global[cd.data["type"]]["useItemIcon"] then
+		icon = cd.data["itemIcon"]
+	end
 	f.tx:SetAllPoints()
-	f.tx:SetTexture(cd.data["icon"])
+	f.tx:SetTexture(icon)
 	f.tx:SetAlpha(s["icons"]["alpha"])
 	
 	-- Set the icon texture zoom
@@ -1141,13 +1212,10 @@ private.CooldownUpdate = function(f, elapsed)
 		
 		-- RUNES
 		elseif d["type"] == "runes" then
-			--if f.updateCount == 0 or f.updateCount % 50 == 0 then
-				--local start, duration, runeReady = GetRuneCooldown(d["runeIndex"])
-				--CDTL2:Print(d["name"]..": "..tostring(start).." - "..tostring(duration).." - "..tostring(runeReady))
-				
-				--d["currentCD"] = (start + duration) - start
-			--end
-			
+			d["currentCD"] = d["currentCD"] - elapsed
+		
+		-- ICD
+		elseif d["type"] == "icds" then
 			d["currentCD"] = d["currentCD"] - elapsed
 		
 		-- TEST/UTILITY

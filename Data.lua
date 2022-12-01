@@ -33,6 +33,17 @@ function CDTL2:GetAllSpellData(class, race)
 	return d
 end
 
+function CDTL2:GetAllICDData()
+	local d = {}
+	
+	for _, icd in pairs(private.GetICDData()) do
+		table.insert(d, icd)
+		--CDTL2:Print("    ICD ADDED: "..spell["id"].." - "..spell["name"].." - "..spell["rank"])
+	end
+	
+	return d
+end
+
 function CDTL2:GetSpellData(id, name)
 	if name then
 		for _, spell in pairs(CDTL2.spellData) do
@@ -1933,6 +1944,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 59161, name = "Haunt", rank = "2", bCD = 8000 } )
 			table.insert(d, { id = 59163, name = "Haunt", rank = "3", bCD = 8000 } )
 			table.insert(d, { id = 59164, name = "Haunt", rank = "4", bCD = 8000 } )
+			table.insert(d, { id = 47241, name = "Metamorphosis", rank = "", bCD = 180000 } )
 			table.insert(d, { id = 17877, name = "Shadowburn", rank = "1", bCD = 15000 } )
 			table.insert(d, { id = 18867, name = "Shadowburn", rank = "2", bCD = 15000 } )
 			table.insert(d, { id = 18868, name = "Shadowburn", rank = "3", bCD = 15000 } )
@@ -2659,6 +2671,46 @@ private.GetPetData = function(class)
 	return d
 end
 
+-- INTERNAL COOLDOWNS
+private.GetICDData = function(trigger)
+	local _, _, _, tocversion = GetBuildInfo()
+	local d = {}
+	
+	-- CLASSIC
+	if tocversion < 20000 then
+		
+	-- TBC
+	elseif tocversion < 30000 then
+		
+	-- WOTLK
+	elseif tocversion < 40000 then
+		-- AURA PROCS
+		table.insert(d, { id = 60065, name = "Reflection of Torment", itemID = 44914, itemName = "Anvil of Titans", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 57345, name = "Darkmoon Card: Greatness", itemID = 44253, itemName = "Darkmoon Card: Greatness", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 57345, name = "Darkmoon Card: Greatness", itemID = 42987, itemName = "Darkmoon Card: Greatness", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 57345, name = "Darkmoon Card: Greatness", itemID = 44255, itemName = "Darkmoon Card: Greatness", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 57345, name = "Darkmoon Card: Greatness", itemID = 44254, itemName = "Darkmoon Card: Greatness", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 60494, name = "Dying Curse", itemID = 40255, itemName = "Dying Curse", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 60492, name = "Embrace of the Spider", itemID = 39229, itemName = "Embrace of the Spider", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 60064, name = "Now is the time!", itemID = 44912, itemName = "Flow of Knowledge", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 60530, name = "Forethought Talisman", itemID = 40258, itemName = "Forethought Talisman", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 60437, name = "Grim Toll", itemID = 40256, itemName = "Grim Toll", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 49623, name = "Effervescence", itemID = 37835, itemName = "Je'Tze's Bell", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 60065, name = "Reflection of Torment", itemID = 40684, itemName = "Mirror of Truth", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 60064, name = "Now is the time!", itemID = 40682, itemName = "Sundial of the Exiled", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 58904, name = "Tears of Anguish", itemID = 43573, itemName = "Tears of Bitter Anguish", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 60062, name = "Essence of Life", itemID = 40685, itemName = "The Egg of Mortal Essence", trigger = "aura", bCD = 45000 } )
+
+		-- SPELL PROCS
+		table.insert(d, { id = 60443, name = "Bandit's Insignia", itemID = 40371, itemName = "Bandit's Insignia", trigger = "spell", bCD = 45000 } )
+		table.insert(d, { id = 60203, name = "Darkmoon Card: Death", itemID = 42990, itemName = "Darkmoon Card: Death", trigger = "spell", bCD = 45000 } )
+		table.insert(d, { id = 60488, name = "Extract of Necromatic Power", itemID = 40373, itemName = "Extract of Necromantic Power", trigger = "spell", bCD = 15000 } )
+		table.insert(d, { id = 60538, name = "Soul of the Dead", itemID = 40382, itemName = "Soul of the Dead", trigger = "spell", bCD = 45000 } )
+end
+	
+	return d
+end
+
 -- The String for the custom text tag description
 function CDTL2:GetCustomTextTagDescription()
 	local text = ""
@@ -3235,7 +3287,15 @@ private.customTextTags = {
 		tag = "%[cd.name%]",
 		func = function(frame)
 					if frame then
-						return frame.data["name"]
+						local name = ""
+						if frame.data["type"] == "icds" then
+							name = frame.data["itemName"]
+						else
+							name = frame.data["name"]
+						end
+						
+						--return frame.data["name"]
+						return name
 					end
 					
 					return "Error"
@@ -3248,7 +3308,16 @@ private.customTextTags = {
 		func = function(frame)
 					if frame then
 						local name = ""
-						local words = frame.data["name"]:gmatch("%S+")
+						
+						local inputName = ""
+						if frame.data["type"] == "icds" then
+							inputName = frame.data["itemName"]
+						else
+							inputName = frame.data["name"]
+						end
+						
+						--local words = frame.data["name"]:gmatch("%S+")
+						local words = inputName:gmatch("%S+")
 						
 						for w in words do
 							w = string.gsub(w , "[()]", "")
@@ -3336,7 +3405,11 @@ private.customTextDynamicTags = {
 							if cd.icon.valid == true or cd.bar.valid == true then
 								if cd.data["currentCD"] > 0 then
 									if cd.data["currentCD"] < lowestTime then
-										name = cd.data["name"]
+										if cd.data["type"] == "icds" then
+											name = cd.data["itemName"]
+										else
+											name = cd.data["name"]
+										end
 										lowestTime = cd.data["currentCD"]
 									end
 								end
@@ -3360,7 +3433,11 @@ private.customTextDynamicTags = {
 							if cd.icon.valid == true or cd.bar.valid == true then
 								if cd.data["currentCD"] > 0 then
 									if cd.data["currentCD"] > lowestTime then
-										name = cd.data["name"]
+										if cd.data["type"] == "icds" then
+											name = cd.data["itemName"]
+										else
+											name = cd.data["name"]
+										end
 										lowestTime = cd.data["currentCD"]
 									end
 								end
@@ -3433,7 +3510,11 @@ private.customTextDynamicTags = {
 								if cd.data["highlighted"] == true then
 									if cd.data["currentCD"] > 0 then
 										if cd.data["currentCD"] < lowestTime then
-											name = cd.data["name"]
+											if cd.data["type"] == "icds" then
+												name = cd.data["itemName"]
+											else
+												name = cd.data["name"]
+											end
 											lowestTime = cd.data["currentCD"]
 										end
 									end
@@ -3459,7 +3540,11 @@ private.customTextDynamicTags = {
 								if cd.data["highlighted"] == true then
 									if cd.data["currentCD"] > 0 then
 										if cd.data["currentCD"] > lowestTime then
-											name = cd.data["name"]
+											if cd.data["type"] == "icds" then
+												name = cd.data["itemName"]
+											else
+												name = cd.data["name"]
+											end
 											lowestTime = cd.data["currentCD"]
 										end
 									end

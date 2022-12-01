@@ -7,8 +7,14 @@ local private = {}
 
 function CDTL2:AddUsedBy(type, id, guid)
 	for _, data in pairs(CDTL2.db.profile.tables[type]) do
-		if data["id"] == id then
-			table.insert(data["usedBy"], guid)
+		if type == "icds" then
+			if data["itemID"] == id then
+				table.insert(data["usedBy"], guid)
+			end
+		else
+			if data["id"] == id then
+				table.insert(data["usedBy"], guid)
+			end
 		end
 	end
 end
@@ -416,6 +422,59 @@ function CDTL2:CheckEngTinkerCases(spellName)
 	return false, nil
 end
 
+function CDTL2:CheckForICD(id)
+	local s = nil
+	
+	for _, e in pairs(CDTL2.db.profile.tables["icds"]) do
+		if e["id"] == id then
+			for i = 0, 23, 1 do
+				local itemId = GetInventoryItemID("player", i)
+				
+				if itemId == e["itemID"] then
+					s = e
+					break
+				end
+			end
+		end
+	end
+	
+	--s = CDTL2:GetICDSettings(id)
+	if s then
+		--local ef = CDTL2:GetExistingCooldown(s["name"], "icds")
+		local ef = CDTL2:GetExistingCooldown(s["itemName"], "icds")
+		if ef then
+			CDTL2:SendToLane(ef)
+			CDTL2:SendToBarFrame(ef)
+		else
+			CDTL2:CreateCooldown(CDTL2:GetUID(),"icds" , s)
+			if not CDTL2:IsUsedBy("icds", s["itemID"], specialCase) then
+				CDTL2:AddUsedBy("icds", s["itemID"], CDTL2.player["guid"])
+			end
+		end
+	else
+		s = CDTL2:GetICDSettings(id)
+		if s then
+			if not s["ignored"] then
+				local ef = CDTL2:GetExistingCooldown(s["itemName"], "icds")
+				if ef then
+					CDTL2:SendToLane(ef)
+					CDTL2:SendToBarFrame(ef)
+				else
+					if CDTL2.db.profile.global["icds"]["enabled"] then
+						table.insert(CDTL2.db.profile.tables["icds"], s)
+						
+						CDTL2:CreateCooldown(CDTL2:GetUID(),"icds" , s)
+						
+						if not CDTL2:IsUsedBy("icds", s["itemID"], specialCase) then
+							CDTL2:AddUsedBy("icds", s["itemID"], CDTL2.player["guid"])
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
 function CDTL2:ConvertTime(raw, style)
 	local t = ""
 	
@@ -479,12 +538,57 @@ function CDTL2:GetCharacterData()
 			}
 		
 			CDTL2.spellData = CDTL2:GetAllSpellData(engClass, engRace)
+			CDTL2.icdData = CDTL2:GetAllICDData()
 			
 			if CDTL2.db.profile.global["debugMode"] then
 				CDTL2:Print("PLAYER: "..CDTL2.player["name"].." - "..CDTL2.player["race"].." - "..CDTL2.player["class"].." - "..CDTL2.player["classPower"])
 			end
 		end
 	end
+end
+
+function CDTL2:GetICDSettings(id)
+	for _, icd in pairs(CDTL2.icdData) do
+		--CDTL2:Print("CHECKING "..id.." AGAINST "..icd["procName"])
+		if icd["id"] == id then
+			--CDTL2:Print("CHECKING "..icd["name"])
+			for i = 0, 23, 1 do
+				local itemId = GetInventoryItemID("player", i)
+				
+				if itemId == icd["itemID"] then
+										
+					local s = {}
+							s["name"] = icd["name"]
+							s["itemName"] = icd["itemName"]
+							s["id"] = icd["id"]
+							s["bCD"] = icd["bCD"]
+							s["itemID"] = icd["itemID"]
+							s["trigger"] = icd["trigger"]
+							s["lane"] = CDTL2.db.profile.global["icds"]["defaultLane"]
+							s["barFrame"] = CDTL2.db.profile.global["icds"]["defaultBar"]
+							s["readyFrame"] = CDTL2.db.profile.global["icds"]["defaultReady"]
+							s["enabled"] = CDTL2.db.profile.global["icds"]["showByDefault"]
+							s["highlight"] = false
+							s["pinned"] = false
+							s["usedBy"] = {}
+							
+					local _, _, icon, _, _, _, _ = GetSpellInfo(icd["id"])
+					s["icon"] = icon
+							
+					local item = Item:CreateFromItemID(icd["itemID"])
+					item:ContinueOnItemLoad(function()
+						--s["itemName"] = item:GetItemName()
+						s["itemIcon"] = item:GetItemIcon()
+						s["link"] = item:GetItemLink()
+					end)
+					
+					return s
+				end
+			end
+		end
+	end
+	
+	return nil
 end
 
 function CDTL2:GetItemSpell(id)
@@ -511,11 +615,14 @@ function CDTL2:GetItemSpell(id)
 				s["enabled"] = CDTL2.db.profile.global["items"]["showByDefault"]
 				s["highlight"] = false
 				s["pinned"] = false
-				
+			
+			local _, _, icon, _, _, _, _ = GetSpellInfo(id)
+			s["icon"] = icon
+			
 			local item = Item:CreateFromItemID(itemId)
 			item:ContinueOnItemLoad(function()
 				s["itemName"] = item:GetItemName()
-				s["icon"] = item:GetItemIcon()
+				s["itemIcon"] = item:GetItemIcon()
 				s["link"] = item:GetItemLink()
 			end)
 
@@ -536,17 +643,20 @@ function CDTL2:GetItemSpell(id)
 					s["id"] = spellID
 					s["bCD"] = 0
 					s["itemID"] = itemId
-					s["lane"] = 1
-					s["barFrame"] = 1
-					s["readyFrame"] = 1
-					s["enabled"] = true
+					s["lane"] = CDTL2.db.profile.global["items"]["defaultLane"]
+					s["barFrame"] = CDTL2.db.profile.global["items"]["defaultBar"]
+					s["readyFrame"] = CDTL2.db.profile.global["items"]["defaultReady"]
+					s["enabled"] = CDTL2.db.profile.global["items"]["showByDefault"]
 					s["highlight"] = false
 					s["pinned"] = false
-					
+				
+				local _, _, icon, _, _, _, _ = GetSpellInfo(id)
+				s["icon"] = icon
+				
 				local item = Item:CreateFromItemID(itemId)
 				item:ContinueOnItemLoad(function()
 					s["itemName"] = item:GetItemName()
-					s["icon"] = item:GetItemIcon()
+					s["itemIcon"] = item:GetItemIcon()
 					s["link"] = item:GetItemLink()
 				end)
 				
@@ -632,7 +742,31 @@ end
 
 function CDTL2:GetExistingCooldown(name, type, targetID)
 	for _, e in pairs(CDTL2.cooldowns) do
-		if e.data["name"] == name and e.data["type"] == type then
+		if e.data["type"] == type then
+			if e.data["type"] == "icds" then
+				if e.data["itemName"] == name then
+					if targetID then
+						if targetID == e.data["targetID"] then
+							return e
+						end
+					else
+						return e
+					end
+				end
+			else
+				if e.data["name"] == name then
+					if targetID then
+						if targetID == e.data["targetID"] then
+							return e
+						end
+					else
+						return e
+					end
+				end
+			end
+		end
+		
+		--[[if e.data["name"] == name and e.data["type"] == type then
 			if targetID then
 				if targetID == e.data["targetID"] then
 					return e
@@ -640,21 +774,33 @@ function CDTL2:GetExistingCooldown(name, type, targetID)
 			else
 				return e
 			end
-		end
+		end]]--
 	end
 	
 	return nil
 end
 
-function CDTL2:GetSpellSettings(name, type, id)
+function CDTL2:GetSpellSettings(name, type, specialCase, id)
 	for _, e in pairs(CDTL2.db.profile.tables[type]) do
 		if id then
 			if e["id"] == id then
 				return e
 			end
 		else
-			if e["name"] == name then
-				return e
+			if specialCase then
+				if type == "icds" then
+					if e["itemName"] == name then
+						return e
+					end
+				else
+					if e["name"] == name then
+						return e
+					end
+				end
+			else
+				if e["name"] == name then
+					return e
+				end
 			end
 		end
 	end
@@ -692,16 +838,46 @@ function CDTL2:GetValidChildren(f)
 	return validChildren
 end
 
-function CDTL2:IsUsedBy(type, id)
+function CDTL2:IsUsedBy(type, id, specialCase)
 	if CDTL2.player["class"] == nil then
 		CDTL2:GetCharacterData()
 	end
 
+	--[[for _, spell in pairs(CDTL2.db.profile.tables[type]) do
+		if type == "icds" then
+			if spell["itemID"] == id then
+				for _, data in pairs(spell["usedBy"]) do
+					if CDTL2.player["guid"] == data then
+						return true
+					end
+				end
+			end
+		else
+			if spell["id"] == id then
+				for _, data in pairs(spell["usedBy"]) do
+					if CDTL2.player["guid"] == data then
+						return true
+					end
+				end
+			end
+		end
+	end]]--
+	
 	for _, spell in pairs(CDTL2.db.profile.tables[type]) do
-		if spell["id"] == id then
-			for _, data in pairs(spell["usedBy"]) do
-				if CDTL2.player["guid"] == data then
-					return true
+		if specialCase then
+			if spell["itemID"] == id then
+				for _, data in pairs(spell["usedBy"]) do
+					if CDTL2.player["guid"] == data then
+						return true
+					end
+				end
+			end
+		else
+			if spell["id"] == id then
+				for _, data in pairs(spell["usedBy"]) do
+					if CDTL2.player["guid"] == data then
+						return true
+					end
 				end
 			end
 		end
@@ -755,18 +931,62 @@ function CDTL2:IsValidItem(itemID)
 	return false
 end
 
-function CDTL2:LoadFilterList(type)
+function CDTL2:LoadFilterList(type, specialCase)
 	local list = {}
 	
-	for _, data in pairs(CDTL2.db.profile.tables[type]) do
+	--[[for _, data in pairs(CDTL2.db.profile.tables[type]) do
 		for _, guid in pairs(data["usedBy"]) do
 			if CDTL2:IsUsedBy(type, data["id"]) then
 				if CDTL2.db.profile.global["hideIgnored"] then
 					if not data["ignored"] then
-						list[data["name"]] = data["name"]
+						if type == "icds" then
+							list[data["itemName"]-] = data["itemName"]
+						else
+							list[data["name"]-] = data["name"]
+						end
 					end
 				else
-					list[data["name"]] = data["name"]
+					if type == "icds" then
+						list[data["itemName"]-] = data["itemName"]
+					else
+						list[data["name"]-] = data["name"]
+					end
+				end
+			end
+		end
+	end]]--
+	
+	--[[for _, data in pairs(CDTL2.db.profile.tables[type]) do
+		for _, guid in pairs(data["usedBy"]) do
+			if type == "icds" then
+				if CDTL2:IsUsedBy(type, data["itemID"]) then
+					if not data["ignored"] then
+						list[data["itemName"]--] = data["itemName"]
+					end
+				end
+			else
+				if CDTL2:IsUsedBy(type, data["id"]) then
+					if not data["ignored"] then
+						list[data["name"]--] = data["name"]
+					end
+				end
+			end
+		end
+	end]]--
+	
+	for _, data in pairs(CDTL2.db.profile.tables[type]) do
+		for _, guid in pairs(data["usedBy"]) do
+			if specialCase then
+				if CDTL2:IsUsedBy(type, data["itemID"], specialCase) then
+					if not data["ignored"] then
+						list[data["itemName"]] = data["itemName"]
+					end
+				end
+			else
+				if CDTL2:IsUsedBy(type, data["id"]) then
+					if not data["ignored"] then
+						list[data["name"]] = data["name"]
+					end
 				end
 			end
 		end
@@ -1108,8 +1328,14 @@ function CDTL2:SetSpellData(name, type, k, v)
 	end
 	
 	for _, e in pairs(CDTL2.db.profile.tables[type]) do
-		if e["name"] == name then
-			e[k] = v
+		if type == "icds" then
+			if e["itemName"] == name then
+				e[k] = v
+			end
+		else
+			if e["name"] == name then
+				e[k] = v
+			end
 		end
 	end
 end

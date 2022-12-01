@@ -66,11 +66,19 @@ function CDTL2:RefreshLane(i)
 	f:SetStatusBarTexture(CDTL2.LSM:Fetch("statusbar", s["fgTexture"]))
 	f:GetStatusBarTexture():SetHorizTile(false)
 	f:GetStatusBarTexture():SetVertTile(false)
+	
+	local fgColor = s["fgTextureColor"]
+	if CDTL2.player["class"] then
+		if s["fgClassColor"] then
+			fgColor = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+		end
+	end
+	
 	f:SetStatusBarColor(
-		s["fgTextureColor"]["r"],
-		s["fgTextureColor"]["g"],
-		s["fgTextureColor"]["b"],
-		s["fgTextureColor"]["a"]
+		fgColor["r"],
+		fgColor["g"],
+		fgColor["b"],
+		fgColor["a"]
 	)
 	
 	if s["vertical"] then
@@ -86,11 +94,25 @@ function CDTL2:RefreshLane(i)
 	-- BACKGROUND
 	f.bg:SetTexture(CDTL2.LSM:Fetch("statusbar", s["bgTexture"]))
 	f.bg:SetAllPoints(true)
-	f.bg:SetVertexColor(
+	--[[f.bg:SetVertexColor(
 		s["bgTextureColor"]["r"],
 		s["bgTextureColor"]["g"],
 		s["bgTextureColor"]["b"],
 		s["bgTextureColor"]["a"]
+	)]]--
+	
+	local bgColor = s["bgTextureColor"]
+	if CDTL2.player["class"] then
+		if s["bgClassColor"] then
+			bgColor = CDTL2.db.profile.global["classColors"][CDTL2.player["class"]]
+		end
+	end
+	
+	f.bg:SetVertexColor(
+		bgColor["r"],
+		bgColor["g"],
+		bgColor["b"],
+		bgColor["a"]
 	)
 	
 	-- SECONDARY TRACKING
