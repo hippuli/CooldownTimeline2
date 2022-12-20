@@ -422,6 +422,28 @@ function CDTL2:CheckEngTinkerCases(spellName)
 	return false, nil
 end
 
+function CDTL2:CheckItemEnchants(spellName)
+	if spellName == "Mind Amplification Dish" then
+		return true, 1
+	elseif spellName == "Flexweave Underlay" then
+		return true, 15
+	elseif spellName == "Springy Arachnoweave" then
+		return true, 15
+	elseif spellName == "Hand-Mounted Pyro Rocket" then
+		return true, 10
+	elseif spellName == "Hyperspeed Accelerators" then
+		return true, 10
+	elseif spellName == "Frag Belt" then
+		return true, 6
+	elseif spellName == "Personal Electromagnetic Pulse Generator" then
+		return true, 6
+	elseif spellName == "Nitro Boosts" then
+		return true, 8
+	end
+	
+	return false, nil
+end
+
 function CDTL2:CheckForICD(id)
 	local s = nil
 	
@@ -447,7 +469,7 @@ function CDTL2:CheckForICD(id)
 			CDTL2:SendToBarFrame(ef)
 		else
 			CDTL2:CreateCooldown(CDTL2:GetUID(),"icds" , s)
-			if not CDTL2:IsUsedBy("icds", s["itemID"], specialCase) then
+			if not CDTL2:IsUsedBy("icds", s["itemID"], true) then
 				CDTL2:AddUsedBy("icds", s["itemID"], CDTL2.player["guid"])
 			end
 		end
@@ -465,7 +487,7 @@ function CDTL2:CheckForICD(id)
 						
 						CDTL2:CreateCooldown(CDTL2:GetUID(),"icds" , s)
 						
-						if not CDTL2:IsUsedBy("icds", s["itemID"], specialCase) then
+						if not CDTL2:IsUsedBy("icds", s["itemID"], true) then
 							CDTL2:AddUsedBy("icds", s["itemID"], CDTL2.player["guid"])
 						end
 					end
@@ -788,10 +810,18 @@ function CDTL2:GetSpellSettings(name, type, specialCase, id)
 			end
 		else
 			if specialCase then
-				if type == "icds" then
+				if type == "icds" or type == "items" then
+					--CDTL2:Print(name.." - "..e["itemName"])
 					if e["itemName"] == name then
 						return e
 					end
+				--[[elseif type == "items" then
+					--CDTL2:Print(name.." - "..e["itemName"])
+					--local s = CDTL2:GetItemSpell(id)
+					
+					if e["itemName"] == name then
+						return e
+					end]]--
 				else
 					if e["name"] == name then
 						return e
@@ -890,7 +920,7 @@ function CDTL2:IsValidItem(itemID)
 	local _, itemType, itemSubType, _, _, classID, subclassID = GetItemInfoInstant(itemID)
 	
 	if CDTL2.db.profile.global["debugMode"] then
-		CDTL2:Print("ITEM: "..itemType.." - "..itemSubType)
+		CDTL2:Print("ITEM: "..itemType.."("..tostring(classID)..") - "..itemSubType.."("..tostring(subclassID)..")")
 	end
 	
 	-- CONSUMABLE
@@ -914,6 +944,15 @@ function CDTL2:IsValidItem(itemID)
 		return true
 	end
 	
+	-- TRADEGOODS
+	if classID == 7 then
+		if
+			subclassID == 2		-- Explosives
+		then
+			return true
+		end
+	end
+	
 	-- QUEST
 	if classID == 12 then
 		return true
@@ -927,6 +966,8 @@ function CDTL2:IsValidItem(itemID)
 			return true
 		end
 	end
+	
+	
 	
 	return false
 end

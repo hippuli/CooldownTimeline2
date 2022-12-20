@@ -12,15 +12,13 @@ private.GetChangelog = function()
 	changeLog = changeLog.."Version 1 settings are saved independent of version 2, so you can manually install and use old versions if you wish\n"
 	changeLog = changeLog.."This also means version 1 settings will not roll over into version 2\n\n"
 	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.7:\n\n"
-	changeLog = changeLog.."  - Fixed an issue that would show runes filter options when not a DK\n"
-	changeLog = changeLog.."  - Added initial support for setting various ui elements to class colors\n"
-	changeLog = changeLog.."  - Added initial support for internal cooldown tracking\n"
-	changeLog = changeLog.."  - ICD tracking only works for epic WotLK P1 trinkets at this time (more items will be updated after testing)\n"
-	changeLog = changeLog.."  - Slightly tweaked filter settings UI\n"
-	changeLog = changeLog.."  - Slightly tweaked item detection/settings system (more coming soon)\n"
-	changeLog = changeLog.."  - Further adjusted offensives to more accurately track them\n"
-	changeLog = changeLog.."  - Warlock ability Metamorphosis should now be able to be tracked\n"
+	changeLog = changeLog.."Changelog 1.8:\n\n"
+	changeLog = changeLog.."  - Fixed an issue that caused an error when refreshing a frame that didnt exist\n"
+	changeLog = changeLog.."  - Fixed an issue that would cause duplicates in ICD data (clearing ICD settings recommended)\n"
+	changeLog = changeLog.."  - Item cooldowns are now detected and displayed(in filters) by item name, not spell name\n"
+	changeLog = changeLog.."  - This does not appear to change any existing settings, but if you have issues please clear settings to refresh\n"
+	changeLog = changeLog.."  - Updated valid item detection to include explosives\n"
+	changeLog = changeLog.."  - Added some more trinkets to ICD data\n"
 		
 	return changeLog
 end
@@ -2150,23 +2148,23 @@ private.GetFilterSet = function(t, o)
 			list = {
 				name = function(info)
 						local n = ""
-						if t == "items" then
+						--[[if t == "items" then
 							n = "By Spell"
-						end
+						end]]--
 						return n
 					end,
 				desc = function(info)
 						local n = ""
-						if t == "items" then
+						--[[if t == "items" then
 							n = "Select by spell name"
-						end
+						end]]--
 						return n
 					end,
 				order = 101,
 				type = "select",
 				values = function(info)
 						local list = {}
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							list = CDTL2:LoadFilterList(t, true)
 						else
 							list = CDTL2:LoadFilterList(t)
@@ -2175,7 +2173,7 @@ private.GetFilterSet = function(t, o)
 					end,
 				get = function(info)
 						local list = {}
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							list = CDTL2:LoadFilterList(t, true)
 						else
 							list = CDTL2:LoadFilterList(t)
@@ -2184,7 +2182,7 @@ private.GetFilterSet = function(t, o)
 					end,
 				set = function(info, val)
 						local list = {}
-						if t == "icds" then
+						if t == "items" or t == "icds"  then
 							list = CDTL2:LoadFilterList(t, true)
 						else
 							list = CDTL2:LoadFilterList(t)
@@ -2259,10 +2257,10 @@ private.GetFilterSet = function(t, o)
 				name = function(info)
 						local n = ""
 						if t == "icds" or t == "items" then
-							local specialCase = false
-							if t == "icds" then
+							local specialCase = true
+							--[[if t == "icds" then
 								specialCase = true
-							end
+							end]]--
 							local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 							
 							if CDTL2.currentFilter[t] then
@@ -2291,10 +2289,10 @@ private.GetFilterSet = function(t, o)
 					end,
 				image = function(info)
 					local specialCase = false
-						if t == "icds" or t == "items" then
-							specialCase = true
-						end
-						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
+					if t == "icds" or t == "items" then
+						specialCase = true
+					end
+					local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
 					
 					if s then
 						return s["itemIcon"]
@@ -2493,7 +2491,7 @@ private.GetFilterSet = function(t, o)
 					end,
 				get = function(info, index)
 						local specialCase = false
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							specialCase = true
 						end
 						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
@@ -2527,7 +2525,7 @@ private.GetFilterSet = function(t, o)
 					end,
 				get = function(info, index)
 						local specialCase = false
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							specialCase = true
 						end
 						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
@@ -2560,7 +2558,7 @@ private.GetFilterSet = function(t, o)
 					end,
 				get = function(info, index)
 						local specialCase = false
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							specialCase = true
 						end
 						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
@@ -2602,7 +2600,7 @@ private.GetFilterSet = function(t, o)
 				values = { [0] = "Hide", [1] = "1", [2] = "2", [3] = "3" },
 				get = function(info)
 						local specialCase = false
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							specialCase = true
 						end
 						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
@@ -2636,7 +2634,7 @@ private.GetFilterSet = function(t, o)
 				values = { [0] = "Hide", [1] = "1", [2] = "2", [3] = "3" },
 				get = function(info)
 						local specialCase = false
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							specialCase = true
 						end
 						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)
@@ -2670,7 +2668,7 @@ private.GetFilterSet = function(t, o)
 				values = { [0] = "Hide", [1] = "1", [2] = "2", [3] = "3" },
 				get = function(info)
 						local specialCase = false
-						if t == "icds" then
+						if t == "items" or t == "icds" then
 							specialCase = true
 						end
 						local s = CDTL2:GetSpellSettings(CDTL2.currentFilter[t], t, specialCase)

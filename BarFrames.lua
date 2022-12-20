@@ -51,6 +51,10 @@ function CDTL2:RefreshBarFrame(i)
 		s = CDTL2.db.profile.barFrames["frame3"]
 	end
 	
+	if not f then
+		return
+	end
+	
 	f.name = s["name"]
 
 	local anchor = "CENTER"

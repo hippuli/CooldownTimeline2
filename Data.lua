@@ -2701,11 +2701,21 @@ private.GetICDData = function(trigger)
 		table.insert(d, { id = 58904, name = "Tears of Anguish", itemID = 43573, itemName = "Tears of Bitter Anguish", trigger = "aura", bCD = 50000 } )
 		table.insert(d, { id = 60062, name = "Essence of Life", itemID = 40685, itemName = "The Egg of Mortal Essence", trigger = "aura", bCD = 45000 } )
 
+		table.insert(d, { id = 60218, name = "Essence of Gossamer", itemID = 37220, itemName = "Essence of Gossamer", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 60479, name = "Forge Ember", itemID = 37660, itemName = "Forge Ember", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 63250, name = "Glory of the Jouster", itemID = 45131, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 63250, name = "Glory of the Jouster", itemID = 45219, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 60302, name = "Meteorite Whetstone", itemID = 37390, itemName = "Meteorite Whetstone", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 60520, name = "Spark of Life", itemID = 37657, itemName = "Spark of Life", trigger = "aura", bCD = 50000 } )
+		
 		-- SPELL PROCS
 		table.insert(d, { id = 60443, name = "Bandit's Insignia", itemID = 40371, itemName = "Bandit's Insignia", trigger = "spell", bCD = 45000 } )
 		table.insert(d, { id = 60203, name = "Darkmoon Card: Death", itemID = 42990, itemName = "Darkmoon Card: Death", trigger = "spell", bCD = 45000 } )
 		table.insert(d, { id = 60488, name = "Extract of Necromatic Power", itemID = 40373, itemName = "Extract of Necromantic Power", trigger = "spell", bCD = 15000 } )
 		table.insert(d, { id = 60538, name = "Soul of the Dead", itemID = 40382, itemName = "Soul of the Dead", trigger = "spell", bCD = 45000 } )
+		
+		table.insert(d, { id = 60307, name = "Vestige of Haldor", itemID = 37064, itemName = "Vestige of Haldor", trigger = "spell", bCD = 45000 } )
+		table.insert(d, { id = 60483, name = "Pendulum of Telluric Currents", itemID = 37264, itemName = "Pendulum of Telluric Currents", trigger = "spell", bCD = 45000 } )
 end
 	
 	return d

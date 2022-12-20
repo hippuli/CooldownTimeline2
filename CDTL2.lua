@@ -10,8 +10,8 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.7
-CDTL2.noticeVersion = 1.7
+CDTL2.version = 1.8
+CDTL2.noticeVersion = 1.8
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
 CDTL2.barFrames = {}
@@ -2256,18 +2256,18 @@ private.CreateFirstRunFrame = function()
 		text = text.."Access to the options panel is now via:\n\n"
 		text = text.."\124cffADFF2F/cdtl2\124r or \124cffADFF2F/cooldowntimeline2\124r\n\n"
 		text = text.."Due to the number of changes made, settings\nfrom Cooldown Timeline will not carry over to CDTL2\n\n"
-		text = text.."Old settings are still saved, and you can manually\ninstall old versions"
+		text = text.."Old settings are still saved, and you can manually\uninstall old versions"
 	end
 	
 	if CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
 		text = text.."\n\n\n"
-		text = text.."This new version adds initial support for ICDs.\n"
-		text = text.."For now only epic WotLK trinkets are supported.\n"
-		text = text.."More items with ICDs will be added in time.\n\n"
-		text = text.."It also adds in some intital changes to items\n"
-		text = text.."that will be expanded in future releases.  So\n"
-		text = text.."this may mean some settings need to be reset.\n"
-		text = text.."You can do this via the filters section.\n"
+		text = text.."This new version changes how items are.\n"
+		text = text.."detected/displayed(in Filters).  This should\n"
+		text = text.."not affect existing settings.  If you notice\n"
+		text = text.."anything not showing up as it should, resetting\n"
+		text = text.."individual settings for that item should fix it.\n\n"
+		text = text.."Extra trinkets have been added to ICD support.\n"
+		text = text.."Enchant ICDs will be coming soon.\n"
 	end
 	
 	text = text.."\n\n"
@@ -2733,7 +2733,16 @@ function CDTL2:UNIT_SPELLCAST_SUCCEEDED(...)
 				end
 			else
 				-- ITEM SPELLS
-				local s = CDTL2:GetSpellSettings(spellName, "items", false, spellID)				
+				local s = nil
+				local is = CDTL2:GetItemSpell(spellID)
+				if is then
+					s = CDTL2:GetSpellSettings(is["itemName"], "items", true)
+				else
+					s = CDTL2:GetSpellSettings(spellName, "items", true, spellID)
+				end
+				
+				
+				
 				if s then
 					if not s["ignored"] then
 						local ef = CDTL2:GetExistingCooldown(s["name"], "items")
@@ -2751,7 +2760,8 @@ function CDTL2:UNIT_SPELLCAST_SUCCEEDED(...)
 						end
 					end
 				else
-					s = CDTL2:GetItemSpell(spellID)
+					s = is
+					--s = CDTL2:GetItemSpell(spellID)
 					if s then
 						if CDTL2:IsValidItem(s["itemID"]) then
 							s["usedBy"] = { CDTL2.player["guid"] }

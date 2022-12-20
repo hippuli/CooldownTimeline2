@@ -259,6 +259,10 @@ function CDTL2:RefreshReady(i)
 		s = CDTL2.db.profile.ready["ready3"]
 	end
 	
+	if not f then
+		return
+	end
+	
 	f.name = s["name"]
 
 	f:ClearAllPoints()

@@ -54,6 +54,10 @@ function CDTL2:RefreshLane(i)
 		s = CDTL2.db.profile.lanes["lane3"]
 	end
 	
+	if not f then
+		return
+	end
+	
 	f.name = s["name"]
 	
 	f:ClearAllPoints()
