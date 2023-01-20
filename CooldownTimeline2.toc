@@ -1,8 +1,8 @@
-## Interface: 30400
+## Interface: 30401
 ## Title: CooldownTimeline2
 ## Author: cliffclive (Vreenak - REMULOS)
 ## Notes: Track cooldowns as icons along a timeline
-## Version: 2.0.1.8
+## Version: 2.0
 ## SavedVariables: CDTL2DB
 ## OptionalDeps: Masque
 

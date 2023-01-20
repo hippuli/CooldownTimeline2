@@ -44,6 +44,17 @@ function CDTL2:GetAllICDData()
 	return d
 end
 
+function CDTL2:GetAllEnchantICDData()
+	local d = {}
+	
+	for _, icd in pairs(private.GetEnchantICDData()) do
+		table.insert(d, icd)
+		--CDTL2:Print("    ICD ADDED: "..spell["id"].." - "..spell["name"].." - "..spell["rank"])
+	end
+	
+	return d
+end
+
 function CDTL2:GetSpellData(id, name)
 	if name then
 		for _, spell in pairs(CDTL2.spellData) do
@@ -2708,6 +2719,23 @@ private.GetICDData = function(trigger)
 		table.insert(d, { id = 60302, name = "Meteorite Whetstone", itemID = 37390, itemName = "Meteorite Whetstone", trigger = "aura", bCD = 45000 } )
 		table.insert(d, { id = 60520, name = "Spark of Life", itemID = 37657, itemName = "Spark of Life", trigger = "aura", bCD = 50000 } )
 		
+		table.insert(d, { id = 64790, name = "Blood of the Old God", itemID = 45522, itemName = "Blood of the Old God", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 64772, name = "Comet's Trail", itemID = 45609, itemName = "Comet's Trail", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 65024, name = "Implosion", itemID = 46038, itemName = "Dark Matter", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 65004, name = "Alacrity of the Elements", itemID = 45866, itemName = "Elemental Focus Stone", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 64713, name = "Flame of the Heavens", itemID = 45518, itemName = "Flare of the Heavens", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 63250, name = "Jouster's Fury", itemID = 45219, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 63250, name = "Jouster's Fury", itemID = 45131, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 65019, name = "Mjolnir Runestone", itemID = 45931, itemName = "Mjolnir Runestone", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 64741, name = "Pandora's Plea", itemID = 45490, itemName = "Pandora's Plea", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 65014, name = "Pyrite Infuser", itemID = 45286, itemName = "Pyrite Infuser", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 64739, name = "Show of Faith", itemID = 45535, itemName = "Show of Faith", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 65003, name = "Memories of Love", itemID = 45929, itemName = "Sif's Remembrance", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 64765, name = "The General's Heart", itemID = 45507, itemName = "The General's Heart", trigger = "aura", bCD = 50000 } )
+		
+		table.insert(d, { id = 63250, name = "Jouster's Fury", itemID = 45219, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 63250, name = "Jouster's Fury", itemID = 45131, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
+		
 		-- SPELL PROCS
 		table.insert(d, { id = 60443, name = "Bandit's Insignia", itemID = 40371, itemName = "Bandit's Insignia", trigger = "spell", bCD = 45000 } )
 		table.insert(d, { id = 60203, name = "Darkmoon Card: Death", itemID = 42990, itemName = "Darkmoon Card: Death", trigger = "spell", bCD = 45000 } )
@@ -2716,7 +2744,30 @@ private.GetICDData = function(trigger)
 		
 		table.insert(d, { id = 60307, name = "Vestige of Haldor", itemID = 37064, itemName = "Vestige of Haldor", trigger = "spell", bCD = 45000 } )
 		table.insert(d, { id = 60483, name = "Pendulum of Telluric Currents", itemID = 37264, itemName = "Pendulum of Telluric Currents", trigger = "spell", bCD = 45000 } )
+	end
+	
+	return d
 end
+
+-- INTERNAL COOLDOWNS
+private.GetEnchantICDData = function(trigger)
+	local _, _, _, tocversion = GetBuildInfo()
+	local d = {}
+	
+	-- CLASSIC
+	if tocversion < 20000 then
+		
+	-- TBC
+	elseif tocversion < 30000 then
+		
+	-- WOTLK
+	elseif tocversion < 40000 then
+		-- AURA PROCS
+		--table.insert(d, { id = 60065, name = "Reflection of Torment", itemID = 44914, itemName = "Anvil of Titans", trigger = "aura", bCD = 50000 } )
+				
+		-- SPELL PROCS
+		--table.insert(d, { id = 60443, name = "Bandit's Insignia", itemID = 40371, itemName = "Bandit's Insignia", trigger = "spell", bCD = 45000 } )
+	end
 	
 	return d
 end

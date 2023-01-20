@@ -460,9 +460,7 @@ function CDTL2:CheckForICD(id)
 		end
 	end
 	
-	--s = CDTL2:GetICDSettings(id)
 	if s then
-		--local ef = CDTL2:GetExistingCooldown(s["name"], "icds")
 		local ef = CDTL2:GetExistingCooldown(s["itemName"], "icds")
 		if ef then
 			CDTL2:SendToLane(ef)
@@ -619,13 +617,7 @@ function CDTL2:GetItemSpell(id)
 		local itemId = GetInventoryItemID("player", i)
 		local spellName, spellID = GetItemSpell(itemId)
 		
-		if spellID == id then
-			--if duration < 1.51 then
-				--CDTL2:Print("FOUND-EQUIPPED: "..itemId.." - TOO LOW!!!")
-			--else
-				--CDTL2:Print("FOUND-EQUIPPED: "..itemId.." - Lower!")
-			--end
-			
+		if spellID == id then			
 			local s = {}
 				s["name"] = spellName
 				s["id"] = spellID
@@ -654,9 +646,9 @@ function CDTL2:GetItemSpell(id)
 	
 	-- INVENTORY
 	for i = 0, 4, 1 do
-		local numberOfSlots = GetContainerNumSlots(i)
+		local numberOfSlots = C_Container.GetContainerNumSlots(i)
 		for x = 0, numberOfSlots, 1 do
-			local itemId = GetContainerItemID(i, x)
+			local itemId = C_Container.GetContainerItemID(i, x)
 			local spellName, spellID = GetItemSpell(itemId)
 			
 			if spellID == id then				
@@ -787,16 +779,6 @@ function CDTL2:GetExistingCooldown(name, type, targetID)
 				end
 			end
 		end
-		
-		--[[if e.data["name"] == name and e.data["type"] == type then
-			if targetID then
-				if targetID == e.data["targetID"] then
-					return e
-				end
-			else
-				return e
-			end
-		end]]--
 	end
 	
 	return nil
@@ -815,13 +797,6 @@ function CDTL2:GetSpellSettings(name, type, specialCase, id)
 					if e["itemName"] == name then
 						return e
 					end
-				--[[elseif type == "items" then
-					--CDTL2:Print(name.." - "..e["itemName"])
-					--local s = CDTL2:GetItemSpell(id)
-					
-					if e["itemName"] == name then
-						return e
-					end]]--
 				else
 					if e["name"] == name then
 						return e
@@ -872,26 +847,6 @@ function CDTL2:IsUsedBy(type, id, specialCase)
 	if CDTL2.player["class"] == nil then
 		CDTL2:GetCharacterData()
 	end
-
-	--[[for _, spell in pairs(CDTL2.db.profile.tables[type]) do
-		if type == "icds" then
-			if spell["itemID"] == id then
-				for _, data in pairs(spell["usedBy"]) do
-					if CDTL2.player["guid"] == data then
-						return true
-					end
-				end
-			end
-		else
-			if spell["id"] == id then
-				for _, data in pairs(spell["usedBy"]) do
-					if CDTL2.player["guid"] == data then
-						return true
-					end
-				end
-			end
-		end
-	end]]--
 	
 	for _, spell in pairs(CDTL2.db.profile.tables[type]) do
 		if specialCase then
@@ -974,46 +929,6 @@ end
 
 function CDTL2:LoadFilterList(type, specialCase)
 	local list = {}
-	
-	--[[for _, data in pairs(CDTL2.db.profile.tables[type]) do
-		for _, guid in pairs(data["usedBy"]) do
-			if CDTL2:IsUsedBy(type, data["id"]) then
-				if CDTL2.db.profile.global["hideIgnored"] then
-					if not data["ignored"] then
-						if type == "icds" then
-							list[data["itemName"]-] = data["itemName"]
-						else
-							list[data["name"]-] = data["name"]
-						end
-					end
-				else
-					if type == "icds" then
-						list[data["itemName"]-] = data["itemName"]
-					else
-						list[data["name"]-] = data["name"]
-					end
-				end
-			end
-		end
-	end]]--
-	
-	--[[for _, data in pairs(CDTL2.db.profile.tables[type]) do
-		for _, guid in pairs(data["usedBy"]) do
-			if type == "icds" then
-				if CDTL2:IsUsedBy(type, data["itemID"]) then
-					if not data["ignored"] then
-						list[data["itemName"]--] = data["itemName"]
-					end
-				end
-			else
-				if CDTL2:IsUsedBy(type, data["id"]) then
-					if not data["ignored"] then
-						list[data["name"]--] = data["name"]
-					end
-				end
-			end
-		end
-	end]]--
 	
 	for _, data in pairs(CDTL2.db.profile.tables[type]) do
 		for _, guid in pairs(data["usedBy"]) do
@@ -1218,7 +1133,7 @@ function CDTL2:ScanCurrentCooldowns(class, race)
 		if spellName then
 			if itemID then
 				if CDTL2:IsValidItem(itemID) then
-					local start, duration, enabled = GetItemCooldown(itemId)
+					local start, duration, enabled = C_Container.GetItemCooldown(itemId)
 					
 					if duration > 1.5 then
 						if CDTL2:GetExistingCooldown(spellName, "items") then
@@ -1275,15 +1190,15 @@ function CDTL2:ScanCurrentCooldowns(class, race)
 	
 	-- ITEMS BAGS
 	for i = 0, 4, 1 do
-		local numberOfSlots = GetContainerNumSlots(i)
+		local numberOfSlots = C_Container.GetContainerNumSlots(i)
 		for x = 0, numberOfSlots, 1 do
-			local itemId = GetContainerItemID(i, x)
+			local itemId = C_Container.GetContainerItemID(i, x)
 			local spellName, spellID = GetItemSpell(itemId)
 			
 			if spellName then
 				if itemID then
 					if CDTL2:IsValidItem(itemId) then
-						local start, duration, enabled = GetItemCooldown(itemId)
+						local start, duration, enabled = C_Container.GetItemCooldown(itemId)
 						
 						if duration > 1.5 then
 							if CDTL2:GetExistingCooldown(spellName, "items") then

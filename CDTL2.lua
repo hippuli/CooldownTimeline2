@@ -10,7 +10,7 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.8
+CDTL2.version = 1.9
 CDTL2.noticeVersion = 1.8
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
@@ -160,7 +160,15 @@ local defaults = {
 			},
 		},
 	
-		lanes = {	
+		lanes = {
+			global = {
+				fgTexture = "CDTL2 Smooth",
+				fgTextureColor = { r = 0.77647, g = 0.11765, b = 0.28235, a = 1 },
+				fgClassColor = true,
+				bgTexture = "CDTL2 Smooth",
+				bgTextureColor = { r = 0.15, g = 0.15, b = 0.15, a = 0.5 },
+				bgClassColor = false,
+			},
 			lane1 = {
 				enabled = true,
 				name = "Lane 1",
@@ -2741,8 +2749,6 @@ function CDTL2:UNIT_SPELLCAST_SUCCEEDED(...)
 					s = CDTL2:GetSpellSettings(spellName, "items", true, spellID)
 				end
 				
-				
-				
 				if s then
 					if not s["ignored"] then
 						local ef = CDTL2:GetExistingCooldown(s["name"], "items")
@@ -2881,6 +2887,53 @@ function CDTL2:ITEM_LOCK_CHANGED(...)
 						end
 					else
 						--CDTL2:Print("NOTFOUND: "..spellID)
+					end
+				end
+			else
+				--CDTL2:CheckForICD(itemId)
+				
+				-- TRIGGER ICD IF NEEDED
+				for _, e in pairs(CDTL2.db.profile.tables["icds"]) do					
+					if e["itemID"] == itemId then
+						s = e
+						
+						--s = CDTL2:GetICDSettings(id)
+						if s then
+							--local ef = CDTL2:GetExistingCooldown(s["name"], "icds")
+							local ef = CDTL2:GetExistingCooldown(s["itemName"], "icds")
+							if ef then
+								CDTL2:SendToLane(ef)
+								CDTL2:SendToBarFrame(ef)
+							else
+								CDTL2:CreateCooldown(CDTL2:GetUID(),"icds" , s)
+								if not CDTL2:IsUsedBy("icds", s["itemID"], true) then
+									CDTL2:AddUsedBy("icds", s["itemID"], CDTL2.player["guid"])
+								end
+							end
+						else
+							s = CDTL2:GetICDSettings(itemId)
+							if s then
+								if not s["ignored"] then
+									local ef = CDTL2:GetExistingCooldown(s["itemName"], "icds")
+									if ef then
+										CDTL2:SendToLane(ef)
+										CDTL2:SendToBarFrame(ef)
+									else
+										if CDTL2.db.profile.global["icds"]["enabled"] then
+											table.insert(CDTL2.db.profile.tables["icds"], s)
+											
+											CDTL2:CreateCooldown(CDTL2:GetUID(),"icds" , s)
+											
+											if not CDTL2:IsUsedBy("icds", s["itemID"], true) then
+												CDTL2:AddUsedBy("icds", s["itemID"], CDTL2.player["guid"])
+											end
+										end
+									end
+								end
+							end
+						end
+						
+						break
 					end
 				end
 			end
@@ -3028,7 +3081,7 @@ function CDTL2:RUNE_POWER_UPDATE(...)
 		if s then
 			if not s["ignored"] then
 				local ef = CDTL2:GetExistingCooldown(s["name"], "runes")
-				if ef then					
+				if ef then			
 					local graceTime = GetTime() - ef.data["runeGraceTime"]
 					if graceTime >= 2.5 then
 						ef.data["baseCD"] = 7.5

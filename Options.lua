@@ -12,13 +12,16 @@ private.GetChangelog = function()
 	changeLog = changeLog.."Version 1 settings are saved independent of version 2, so you can manually install and use old versions if you wish\n"
 	changeLog = changeLog.."This also means version 1 settings will not roll over into version 2\n\n"
 	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.8:\n\n"
-	changeLog = changeLog.."  - Fixed an issue that caused an error when refreshing a frame that didnt exist\n"
-	changeLog = changeLog.."  - Fixed an issue that would cause duplicates in ICD data (clearing ICD settings recommended)\n"
-	changeLog = changeLog.."  - Item cooldowns are now detected and displayed(in filters) by item name, not spell name\n"
-	changeLog = changeLog.."  - This does not appear to change any existing settings, but if you have issues please clear settings to refresh\n"
-	changeLog = changeLog.."  - Updated valid item detection to include explosives\n"
-	changeLog = changeLog.."  - Added some more trinkets to ICD data\n"
+	changeLog = changeLog.."Changelog 1.9:\n\n"
+	changeLog = changeLog.."  - Updated for the phase 2 content patch\n"
+	changeLog = changeLog.."  - Fixed an issue that caused an error in rune tracking (thanks MrFIXIT)\n"
+	changeLog = changeLog.."  - Fixed an issue that prevented setting lane bgcolor when fgcolor was set to class color\n"
+	changeLog = changeLog.."  - Added ICD data for phase 2 trinkets\n"
+	changeLog = changeLog.."  - Equipping a trinket with an ICD will now generate a cooldown for that ICD\n"
+	changeLog = changeLog.."\n"
+	changeLog = changeLog.."Changelog 1.9r1:\n\n"
+	changeLog = changeLog.."  - Fixed (hopefully for real this time) an issue that caused an error in rune tracking (thanks MrFIXIT again)\n"
+	changeLog = changeLog.."  - Fixed a few extra issues with changes in API that I missed\n"
 		
 	return changeLog
 end
@@ -1214,6 +1217,126 @@ private.GetGlobalSet = function(t)
 				type = "description",
 				order = 101,
 			},
+			fgTexture = {
+				name = "Foreground Texture",
+				desc = "Selects the texture",
+				order = 501,
+				type = "select",
+				width = 0.7,
+				dialogControl = 'LSM30_Statusbar',
+				values = AceGUIWidgetLSMlists.statusbar,
+				get = function(info, index)
+						return "None"
+					end,
+				set = function(info, val)
+						CDTL2.db.profile.lanes["lane1"]["fgTexture"] = val
+						CDTL2.db.profile.lanes["lane2"]["fgTexture"] = val
+						CDTL2.db.profile.lanes["lane3"]["fgTexture"] = val
+						CDTL2:RefreshLane(1)
+						CDTL2:RefreshLane(2)
+						CDTL2:RefreshLane(3)
+					end,
+			},
+			fgTextureColor = {
+				name = "Color",
+				desc = "Sets the texture color",
+				order = 502,
+				type = "color",
+				width = 0.4,
+				hasAlpha = true,
+				get = function(info)
+						return CDTL2.db.profile.lanes["global"]["fgTextureColor"]
+					end,
+				set = function(info, red, green, blue, alpha)
+						--lane["fgTextureColor"] = { r = red, g = green, b = blue, a = alpha }
+						local color = { r = red, g = green, b = blue, a = alpha }
+						
+						CDTL2.db.profile.lanes["global"]["fgTextureColor"] = color
+						CDTL2.db.profile.lanes["lane1"]["fgTextureColor"] = color
+						CDTL2.db.profile.lanes["lane2"]["fgTextureColor"] = color
+						CDTL2.db.profile.lanes["lane3"]["fgTextureColor"] = color
+						CDTL2:RefreshLane(1)
+						CDTL2:RefreshLane(2)
+						CDTL2:RefreshLane(3)
+					end,
+			},
+			fgClassColor = {
+				name = "Class Color",
+				desc = "Set the texture color to your class color",
+				order = 503,
+				type = "toggle",
+				width = 0.5,
+				get = function(info)
+						return false
+					end,
+				set = function(info, val)
+						--lane["fgClassColor"] = val
+						CDTL2.db.profile.lanes["lane1"]["fgClassColor"] = val
+						CDTL2.db.profile.lanes["lane2"]["fgClassColor"] = val
+						CDTL2.db.profile.lanes["lane3"]["fgClassColor"] = val
+						CDTL2:RefreshLane(1)
+						CDTL2:RefreshLane(2)
+						CDTL2:RefreshLane(3)
+					end,
+			},
+			spacer600 = {
+				name = "",
+				type = "description",
+				order = 600,
+			},
+			bgTexture = {
+				name = "Background Texture",
+				desc = "Sets the background texture",
+				order = 601,
+				type = "select",
+				width = 0.7,
+				dialogControl = 'LSM30_Statusbar',
+				values = AceGUIWidgetLSMlists.statusbar,
+				get = function(info, index)
+						return "None"
+					end,
+				set = function(info, val)
+						CDTL2.db.profile.lanes["lane1"]["bgTexture"] = val
+						CDTL2.db.profile.lanes["lane2"]["bgTexture"] = val
+						CDTL2.db.profile.lanes["lane3"]["bgTexture"] = val
+						CDTL2:RefreshLane(1)
+						CDTL2:RefreshLane(2)
+						CDTL2:RefreshLane(3)
+					end,
+			},
+			--[[bgTextureColor = {
+				name = "Color",
+				desc = "Sets the background texture color",
+				order = 602,
+				type = "color",
+				width = 0.4,
+				hasAlpha = true,
+				get = function(info)
+						return { r = 0.1, g = 0.1, b = 0.1, a = 1 }
+					end,
+				set = function(info, red, green, blue, alpha)
+						--lane["bgTextureColor"] = { r = red, g = green, b = blue, a = alpha }
+						CDTL2:RefreshLane(1)
+						CDTL2:RefreshLane(2)
+						CDTL2:RefreshLane(3)
+					end,
+			},
+			bgClassColor = {
+				name = "Class Color",
+				desc = "Set the texture color to your class color",
+				order = 603,
+				type = "toggle",
+				width = 0.5,
+				get = function(info)
+						return false
+					end,
+				set = function(info, val)
+						--lane["bgClassColor"] = val
+						CDTL2:RefreshLane(1)
+						CDTL2:RefreshLane(2)
+						CDTL2:RefreshLane(3)
+					end,
+			},]]--
 		},
 	}
 
@@ -3746,7 +3869,7 @@ private.GetLaneSet = function(i)
 						width = 0.4,
 						hasAlpha = true,
 						disabled  = function(info)
-								return lane["fgClassColor"]
+								return lane["bgClassColor"]
 							end,
 						get = function(info)
 								local c = lane["bgTextureColor"]

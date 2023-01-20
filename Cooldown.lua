@@ -57,6 +57,10 @@ function CDTL2:CreateCooldown(UID, cdType, cdData)
 		f.data["runeIndex"] = cdData["runeIndex"]
 	end
 	
+	if cdType == "runes" then
+		f.data["runeGraceTime"] = 0
+	end
+	
 	if cdType == "items" or cdType == "icds" then
 		if cdData["itemIcon"] then
 			f.data["itemIcon"] = cdData["itemIcon"]
@@ -84,7 +88,7 @@ function CDTL2:CreateCooldown(UID, cdType, cdData)
 	end)
 	
 	f.icon = CDTL2:CreateIcon(fName, f)
-	CDTL2:SendToLane(f)
+	CDTL2:SendToLane(f) 
 	
 	f.bar = CDTL2:CreateBar(fName, f)
 	CDTL2:SendToBarFrame(f)
@@ -1067,16 +1071,12 @@ private.CooldownUpdate = function(f, elapsed)
 		if d["type"] == "spells" or d["type"] == "petspells" then	
 			if d["oaf"] then
 				if CDTL2:AuraExists("player", d["name"]) or UnitChannelInfo("player") then
-					--if f.updateCount % 50 == 0 then
-						--CDTL2:Print("WAITING")
-					--end
+					-- Placeholder
 				else
 					local start, duration, enabled, _ = GetSpellCooldown(d["id"])
 					
 					if enabled == 0 then
-						--if f.updateCount % 50 == 0 then
-							--CDTL2:Print("STILL WAITING")
-						--end
+						-- Placeholder
 					else
 						if d["currentCD"] >= 0 then
 							d["currentCD"] = d["currentCD"] - elapsed
@@ -1124,7 +1124,7 @@ private.CooldownUpdate = function(f, elapsed)
 							CDTL2:SetSpellData(d["name"], "items", "bCD", duration * 1000)
 						end
 					else
-						local start, duration, enabled = GetItemCooldown(d["itemID"])
+						local start, duration, enabled = C_Container.GetItemCooldown(d["itemID"])
 						
 						d["baseCD"] = duration
 						CDTL2:SetSpellData(d["name"], "items", "bCD", duration * 1000)
@@ -1155,7 +1155,7 @@ private.CooldownUpdate = function(f, elapsed)
 							d["currentCD"] = start + duration - GetTime()
 						end
 					else
-						local start, duration, enabled = GetItemCooldown(d["itemID"])
+						local start, duration, enabled = C_Container.GetItemCooldown(d["itemID"])
 						d["baseCD"] = duration
 						d["currentCD"] = start + duration - GetTime()
 					end
@@ -1231,9 +1231,6 @@ private.CooldownUpdate = function(f, elapsed)
 			private.BarUpdate(f, elapsed)
 		end
 	end
-	
-	--private.IconUpdate(f, elapsed)
-	--private.BarUpdate(f, elapsed)
 	
 	f.updateCount = f.updateCount + 1
 	
@@ -1439,7 +1436,7 @@ function CDTL2:SendToBarFrame(f)
 	if f.data["barFrame"] == 1 then
 		if CDTL2_BarFrame_1_MF then
 			ba:GetParent().triggerUpdate = true
-			ba:SetParent("CDTL2_BarFrame_1_MF")
+			ba:SetParent(CDTL2_BarFrame_1_MF)
 			CDTL2_BarFrame_1_MF.triggerUpdate = true		
 		else
 			CDTL2:SendToBarHolding(f)
@@ -1447,7 +1444,7 @@ function CDTL2:SendToBarFrame(f)
 	elseif f.data["barFrame"] == 2 then
 		if CDTL2_BarFrame_2_MF then
 			ba:GetParent().triggerUpdate = true
-			ba:SetParent("CDTL2_BarFrame_2_MF")
+			ba:SetParent(CDTL2_BarFrame_2_MF)
 			CDTL2_BarFrame_2_MF.triggerUpdate = true
 		else
 			CDTL2:SendToBarHolding(f)
@@ -1455,7 +1452,7 @@ function CDTL2:SendToBarFrame(f)
 	elseif f.data["barFrame"] == 3 then
 		if CDTL2_BarFrame_3_MF then
 			ba:GetParent().triggerUpdate = true
-			ba:SetParent("CDTL2_BarFrame_3_MF")
+			ba:SetParent(CDTL2_BarFrame_3_MF)
 			CDTL2_BarFrame_3_MF.triggerUpdate = true
 		else
 			CDTL2:SendToBarHolding(f)
@@ -1472,10 +1469,10 @@ function CDTL2:SendToBarHolding(f)
 	
 	if f.data["type"] == "offensives" then
 		ba:GetParent().triggerUpdate = true
-		ba:SetParent("CDTL2_Offensive_Bar_Holding")
+		ba:SetParent(CDTL2_Offensive_Bar_Holding)
 	else
 		ba:GetParent().triggerUpdate = true
-		ba:SetParent("CDTL2_Bar_Holding")
+		ba:SetParent(CDTL2_Bar_Holding)
 	end
 	
 	CDTL2:RefreshBar(f)
@@ -1486,11 +1483,11 @@ function CDTL2:SendToHolding(f)
 	
 	if f.data["type"] == "offensives" then
 		ic:GetParent().triggerUpdate = true
-		ic:SetParent("CDTL2_Offensive_Icon_Holding")
+		ic:SetParent(CDTL2_Offensive_Icon_Holding)
 		f.data["overrideCD"] = false
 	else
 		ic:GetParent().triggerUpdate = true
-		ic:SetParent("CDTL2_Active_Icon_Holding")
+		ic:SetParent(CDTL2_Active_Icon_Holding)
 		f.data["overrideCD"] = false
 		--ic:Hide()
 	end
@@ -1510,7 +1507,7 @@ function CDTL2:SendToLane(f)
 			--ic:GetParent().currentCount = ic:GetParent().currentCount - 1
 			--ic:Show()
 			ic:GetParent().triggerUpdate = true
-			ic:SetParent("CDTL2_Lane_1")
+			ic:SetParent(CDTL2_Lane_1)
 			CDTL2_Lane_1.triggerUpdate = true
 			--CDTL2_Lane_1.currentCount = CDTL2_Lane_1.currentCount + 1
 		else
@@ -1520,7 +1517,7 @@ function CDTL2:SendToLane(f)
 		if CDTL2_Lane_2 then
 			--ic:GetParent().currentCount = ic:GetParent().currentCount - 1
 			ic:GetParent().triggerUpdate = true
-			ic:SetParent("CDTL2_Lane_2")
+			ic:SetParent(CDTL2_Lane_2)
 			CDTL2_Lane_2.triggerUpdate = true
 			--CDTL2_Lane_2.currentCount = CDTL2_Lane_2.currentCount + 1
 		else
@@ -1530,7 +1527,7 @@ function CDTL2:SendToLane(f)
 		if CDTL2_Lane_3 then
 			--ic:GetParent().currentCount = ic:GetParent().currentCount - 1
 			ic:GetParent().triggerUpdate = true
-			ic:SetParent("CDTL2_Lane_3")
+			ic:SetParent(CDTL2_Lane_3)
 			CDTL2_Lane_3.triggerUpdate = true
 			--CDTL2_Lane_3.currentCount = CDTL2_Lane_3.currentCount + 1
 		else
@@ -1553,7 +1550,7 @@ function CDTL2:SendToReady(f)
 	if f.data["readyFrame"] == 1 then
 		if CDTL2_Ready_1_MF then
 			ic:GetParent().triggerUpdate = true
-			ic:SetParent("CDTL2_Ready_1_MF")
+			ic:SetParent(CDTL2_Ready_1_MF)
 			s = CDTL2.db.profile.ready["ready1"]
 			ic.readyTime = s["nTime"]
 			
@@ -1576,7 +1573,7 @@ function CDTL2:SendToReady(f)
 	elseif f.data["readyFrame"] == 2 then
 		if CDTL2_Ready_2_MF then
 			ic:GetParent().triggerUpdate = true
-			ic:SetParent("CDTL2_Ready_2_MF")
+			ic:SetParent(CDTL2_Ready_2_MF)
 			s = CDTL2.db.profile.ready["ready2"]
 			ic.readyTime = s["nTime"]
 			
@@ -1599,7 +1596,7 @@ function CDTL2:SendToReady(f)
 	elseif f.data["readyFrame"] == 3 then
 		if CDTL2_Ready_3_MF then
 			ic:GetParent().triggerUpdate = true
-			ic:SetParent("CDTL2_Ready_3_MF")
+			ic:SetParent(CDTL2_Ready_3_MF)
 			s = CDTL2.db.profile.ready["ready3"]
 			ic.readyTime = s["nTime"]
 			
