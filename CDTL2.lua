@@ -10,7 +10,10 @@ CDTL2 = LibStub("AceAddon-3.0"):NewAddon("CDTL2", "AceConsole-3.0", "AceEvent-3.
 CDTL2.Masque = LibStub("Masque", true)
 CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 
-CDTL2.version = 1.9
+local _, _, _, tocversion = GetBuildInfo()
+CDTL2.tocversion = tocversion
+
+CDTL2.version = 1.10
 CDTL2.noticeVersion = 1.8
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
@@ -2068,8 +2071,6 @@ function CDTL2:OnEnable()
 	--self:RegisterEvent("UNIT_POWER_FREQUENT")
 	--self:RegisterEvent("UNIT_POWER_UPDATE")
 	
-	--self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
-	
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("GROUP_JOINED")
 	self:RegisterEvent("GROUP_LEFT")
@@ -2102,6 +2103,11 @@ function CDTL2:OnEnable()
 		CDTL2:RefreshLane(3)
 	end)
 	
+	--local 
+	
+	
+	local vMajor = 0
+	local vMinor = 0
 	if CDTL2.db.profile.global["firstRun"] or CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
 		C_Timer.After(10, function()
 			private.CreateFirstRunFrame()
@@ -3225,7 +3231,10 @@ function CDTL2:TurnOn()
 		CDTL2:RegisterEvent("PLAYER_REGEN_ENABLED")
 		CDTL2:RegisterEvent("UNIT_POWER_FREQUENT")
 		CDTL2:RegisterEvent("UNIT_POWER_UPDATE")
-		CDTL2:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+		
+		if CDTL2.tocversion >= 20000 then
+			CDTL2:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+		end
 		
 		CDTL2.enabled = true
 	end
@@ -3244,6 +3253,8 @@ function CDTL2:TurnOff()
 		CDTL2:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		CDTL2:UnregisterEvent("UNIT_POWER_FREQUENT")
 		CDTL2:UnregisterEvent("UNIT_POWER_UPDATE")
+		
+		
 		CDTL2:UnregisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
 		
 		CDTL2.enabled = false

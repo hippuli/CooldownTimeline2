@@ -12,16 +12,12 @@ private.GetChangelog = function()
 	changeLog = changeLog.."Version 1 settings are saved independent of version 2, so you can manually install and use old versions if you wish\n"
 	changeLog = changeLog.."This also means version 1 settings will not roll over into version 2\n\n"
 	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.9:\n\n"
-	changeLog = changeLog.."  - Updated for the phase 2 content patch\n"
-	changeLog = changeLog.."  - Fixed an issue that caused an error in rune tracking (thanks MrFIXIT)\n"
-	changeLog = changeLog.."  - Fixed an issue that prevented setting lane bgcolor when fgcolor was set to class color\n"
-	changeLog = changeLog.."  - Added ICD data for phase 2 trinkets\n"
-	changeLog = changeLog.."  - Equipping a trinket with an ICD will now generate a cooldown for that ICD\n"
+	changeLog = changeLog.."Changelog 1.10:\n\n"
+	changeLog = changeLog.."  - Updated for the phase 3 content patch\n"
+	changeLog = changeLog.."  - Added ICD data for phase 3 trinkets\n"
+	changeLog = changeLog.."  - Fixed and event error in Classic Era\n"
+	changeLog = changeLog.."  - Fixed item use issues in Classic Era\n"
 	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.9r1:\n\n"
-	changeLog = changeLog.."  - Fixed (hopefully for real this time) an issue that caused an error in rune tracking (thanks MrFIXIT again)\n"
-	changeLog = changeLog.."  - Fixed a few extra issues with changes in API that I missed\n"
 		
 	return changeLog
 end

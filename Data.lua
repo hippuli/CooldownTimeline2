@@ -115,19 +115,19 @@ end
 
 -- UNCATAGORISED
 private.GetOtherData = function()
-	local _, _, _, tocversion = GetBuildInfo()
+	--local _, _, _, tocversion = GetBuildInfo()
 	local d = {}
 	
 	-- CLASSIC
-	if tocversion < 20000 then
+	if CDTL2.tocversion < 20000 then
 		table.insert(d, { id = 818, name = "Basic Campfire", rank = "", bCD = 300000 } )
 		
 	-- TBC
-	elseif tocversion < 30000 then
+	elseif CDTL2.tocversion < 30000 then
 		table.insert(d, { id = 818, name = "Basic Campfire", rank = "", bCD = 300000 } )
 	
 	-- WOTLK
-	elseif tocversion < 40000 then
+	elseif CDTL2.tocversion < 40000 then
 		table.insert(d, { id = 818, name = "Basic Campfire", rank = "", bCD = 300000 } )
 		table.insert(d, { id = 55428, name = "Lifeblood", rank = "1", bCD = 180000 } )
 		table.insert(d, { id = 55480, name = "Lifeblood", rank = "2", bCD = 180000 } )
@@ -142,11 +142,11 @@ end
 
 -- RACIALS
 private.GetRacialData = function()
-	local _, _, _, tocversion = GetBuildInfo()
+	--local _, _, _, tocversion = GetBuildInfo()
 	local d = {}
 	
 	-- CLASSIC
-	if tocversion < 20000 then
+	if CDTL2.tocversion < 20000 then
 		table.insert(d, { id = 20554, name = "Berserking", race = "Troll", rank = "", bCD = 180000 } )
 		table.insert(d, { id = 26296, name = "Berserking", race = "Troll", rank = "", bCD = 180000 } )
 		table.insert(d, { id = 26297, name = "Berserking", race = "Troll", rank = "", bCD = 180000 } )
@@ -160,7 +160,7 @@ private.GetRacialData = function()
 		table.insert(d, { id = 7744, name = "Will of the Forsaken", race = "Undead", rank = "", bCD = 120000 } )
 		
 	-- TBC
-	elseif tocversion < 30000 then
+	elseif CDTL2.tocversion < 30000 then
 		table.insert(d, { id = 25046, name = "Arcane Torrent", race = "Bloodelf", rank = "", bCD = 120000 } )
 		table.insert(d, { id = 28730, name = "Arcane Torrent", race = "Bloodelf", rank = "", bCD = 120000 } )
 		table.insert(d, { id = 20554, name = "Berserking", race = "Troll", rank = "", bCD = 180000 } )
@@ -180,7 +180,7 @@ private.GetRacialData = function()
 		table.insert(d, { id = 7744, name = "Will of the Forsaken", race = "Undead", rank = "", bCD = 120000 } )
 	
 	-- WOTLK
-	elseif tocversion < 40000 then
+	elseif CDTL2.tocversion < 40000 then
 		table.insert(d, { id = 25046, name = "Arcane Torrent", race = "Bloodelf", rank = "", bCD = 120000 } )
 		table.insert(d, { id = 28730, name = "Arcane Torrent", race = "Bloodelf", rank = "", bCD = 120000 } )
 		table.insert(d, { id = 50613, name = "Arcane Torrent", race = "Bloodelf", rank = "", bCD = 120000 } )
@@ -210,7 +210,7 @@ end
 
 -- CLASS
 private.GetClassData = function(class)
-	local _, _, _, tocversion = GetBuildInfo()
+	--local _, _, _, tocversion = GetBuildInfo()
 	local d = {}
 	
 	-- Death Knight
@@ -266,7 +266,7 @@ private.GetClassData = function(class)
 	-- Druid
 	if class == "DRUID" then		
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 22812, name = "Barkskin", rank = "", bCD = 60000 } )
 			table.insert(d, { id = 5211, name = "Bash", rank = "1", bCD = 60000 } )
@@ -320,7 +320,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 18562, name = "Swiftmend", rank = "", bCD = 15000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 22812, name = "Barkskin", rank = "", bCD = 60000 } )
 			table.insert(d, { id = 5211, name = "Bash", rank = "1", bCD = 60000 } )
@@ -388,7 +388,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 18562, name = "Swiftmend", rank = "", bCD = 15000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 22812, name = "Barkskin", rank = "", bCD = 60000 } )
 			table.insert(d, { id = 5211, name = "Bash", rank = "1", bCD = 60000 } )
@@ -474,7 +474,7 @@ private.GetClassData = function(class)
 	-- Hunter
 	if class == "HUNTER" then		
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 3044, name = "Arcane Shot", rank = "1", bCD = 6000 } )
 			table.insert(d, { id = 14281, name = "Arcane Shot", rank = "2", bCD = 6000 } )
@@ -554,7 +554,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 24133, name = "Wyvern Sting", rank = "3", bCD = 120000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 3044, name = "Arcane Shot", rank = "1", bCD = 6000 } )
 			table.insert(d, { id = 14281, name = "Arcane Shot", rank = "2", bCD = 6000 } )
@@ -654,7 +654,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 27068, name = "Wyvern Sting", rank = "4", bCD = 120000 } )
 				
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 3044, name = "Arcane Shot", rank = "1", bCD = 6000 } )
 			table.insert(d, { id = 14281, name = "Arcane Shot", rank = "2", bCD = 6000 } )
@@ -803,7 +803,7 @@ private.GetClassData = function(class)
 	-- Mage
 	if class == "MAGE" then	
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 1953, name = "Blink", rank = "", bCD = 15000 } )
 			table.insert(d, { id = 120, name = "Cone of Cold", rank = "1", bCD = 10000 } )
@@ -858,7 +858,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 12043, name = "Presence of Mind", rank = "", bCD = 180000, oaf = true } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 1953, name = "Blink", rank = "", bCD = 15000 } )
 			table.insert(d, { id = 120, name = "Cone of Cold", rank = "1", bCD = 10000 } )
@@ -937,7 +937,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 31687, name = "Summon Water Elemental", rank = "", bCD = 180000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 1953, name = "Blink", rank = "", bCD = 15000 } )
 			table.insert(d, { id = 120, name = "Cone of Cold", rank = "1", bCD = 10000 } )
@@ -1041,7 +1041,7 @@ private.GetClassData = function(class)
 	-- Paladin
 	if class == "PALADIN" then		
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 1044, name = "Blessing of Freedom", rank = "", bCD = 20000 } )
 			table.insert(d, { id = 1022, name = "Blessing of Protection", rank = "1", bCD = 300000 } )
@@ -1091,7 +1091,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 20066, name = "Repentance", rank = "", bCD = 60000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 31884, name = "Avenging Wrath", rank = "", bCD = 180000 } )
 			table.insert(d, { id = 1044, name = "Blessing of Freedom", rank = "", bCD = 25000 } )
@@ -1160,7 +1160,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 20066, name = "Repentance", rank = "", bCD = 60000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 31884, name = "Avenging Wrath", rank = "", bCD = 180000 } )
 			table.insert(d, { id = 26573, name = "Consecration", rank = "1", bCD = 8000 } )
@@ -1251,7 +1251,7 @@ private.GetClassData = function(class)
 	-- Priest
 	if class == "PRIEST" then
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 13908, name = "Desperate Prayer", rank = "1", bCD = 600000 } )
 			table.insert(d, { id = 19236, name = "Desperate Prayer", rank = "2", bCD = 600000 } )
@@ -1318,7 +1318,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 15286, name = "Vampiric Embrace", rank = "", bCD = 10000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 44041, name = "Chastise", rank = "1", bCD = 30000 } )
 			table.insert(d, { id = 44043, name = "Chastise", rank = "2", bCD = 30000 } )
@@ -1411,7 +1411,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 15286, name = "Vampiric Embrace", rank = "", bCD = 10000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 64843, name = "Divine Hymn", rank = "1", bCD = 480000 } )
 			table.insert(d, { id = 586, name = "Fade", rank = "", bCD = 30000 } )
@@ -1509,7 +1509,7 @@ private.GetClassData = function(class)
 	-- Rogue
 	if class == "ROGUE" then		
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 2094, name = "Blind", rank = "", bCD = 300000 } )
 			table.insert(d, { id = 1725, name = "Distract", rank = "", bCD = 30000 } )
@@ -1550,7 +1550,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 14251, name = "Riposte", rank = "", bCD = 6000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 2094, name = "Blind", rank = "", bCD = 180000 } )
 			table.insert(d, { id = 31224, name = "Cloak of Shadows", rank = "", bCD = 60000 } )
@@ -1598,7 +1598,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 36554, name = "Shadowstep", rank = "", bCD = 30000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 2094, name = "Blind", rank = "", bCD = 180000 } )
 			table.insert(d, { id = 31224, name = "Cloak of Shadows", rank = "", bCD = 90000 } )
@@ -1644,7 +1644,7 @@ private.GetClassData = function(class)
 	-- Shaman
 	if class == "SHAMAN" then		
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 556, name = "Astral Recall", rank = "", bCD = 900000 } )
 			table.insert(d, { id = 421, name = "Chain Lightning", rank = "1", bCD = 6000 } )
@@ -1686,7 +1686,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 16166, name = "Elemental Mastery", rank = "", bCD = 180000, oaf = true } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 556, name = "Astral Recall", rank = "", bCD = 900000 } )
 			table.insert(d, { id = 2825, name = "Bloodlust", rank = "1", bCD = 600000 } )
@@ -1744,7 +1744,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 17364, name = "Stormstrike", rank = "", bCD = 10000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 556, name = "Astral Recall", rank = "", bCD = 900000 } )
 			table.insert(d, { id = 2825, name = "Bloodlust", rank = "", bCD = 300000 } )
@@ -1834,7 +1834,7 @@ private.GetClassData = function(class)
 	-- Warlock
 	if class == "WARLOCK" then		
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 603, name = "Curse of Doom", rank = "", bCD = 60000 } )
 			table.insert(d, { id = 6789, name = "Death Coil", rank = "1", bCD = 120000 } )
@@ -1866,7 +1866,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 18871, name = "Shadowburn", rank = "6", bCD = 15000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 603, name = "Curse of Doom", rank = "1", bCD = 60000 } )
 			table.insert(d, { id = 30910, name = "Curse of Doom", rank = "2", bCD = 60000 } )
@@ -1911,7 +1911,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 30414, name = "Shadowfury", rank = "3", bCD = 20000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 59671, name = "Challenging Howl", rank = "", bCD = 15000 } )
 			table.insert(d, { id = 603, name = "Curse of Doom", rank = "1", bCD = 60000 } )
@@ -1977,7 +1977,7 @@ private.GetClassData = function(class)
 	-- Warrior
 	if class == "WARRIOR" then		
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			-- SPELLS
 			table.insert(d, { id = 2457, name = "Battle Stance", rank = "", bCD = 1000 } )
 			table.insert(d, { id = 18499, name = "Berserker Rage", rank = "", bCD = 30000 } )
@@ -2045,7 +2045,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 12292, name = "Sweeping Strikes", rank = "", bCD = 30000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			-- SPELLS
 			table.insert(d, { id = 2457, name = "Battle Stance", rank = "", bCD = 1000 } )
 			table.insert(d, { id = 18499, name = "Berserker Rage", rank = "", bCD = 30000 } )
@@ -2128,7 +2128,7 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 12328, name = "Sweeping Strikes", rank = "", bCD = 30000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			-- SPELLS
 			table.insert(d, { id = 2457, name = "Battle Stance", rank = "", bCD = 1000 } )
 			table.insert(d, { id = 18499, name = "Berserker Rage", rank = "", bCD = 30000 } )
@@ -2209,13 +2209,13 @@ end
 
 -- PET SPELLS
 private.GetPetData = function(class)
-	local _, _, _, tocversion = GetBuildInfo()
+	--local _, _, _, tocversion = GetBuildInfo()
 	local d = {}
 	
 	-- Death Knight
 	if class == "DEATHKNIGHT" then			
 		-- WOTLK
-		if tocversion < 40000 then
+		if CDTL2.tocversion < 40000 then
 			table.insert(d, { id = 47481, name = "Gnaw", rank = "", bCD = 60000 } )
 			table.insert(d, { id = 47484, name = "Huddle", rank = "", bCD = 45000 } )
 			table.insert(d, { id = 47482, name = "Leap", rank = "", bCD = 20000 } )
@@ -2225,7 +2225,7 @@ private.GetPetData = function(class)
 	-- Hunter
 	if class == "HUNTER" then
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			table.insert(d, { id = 17253, name = "Bite", rank = "1", bCD = 10000 } )
 			table.insert(d, { id = 17255, name = "Bite", rank = "2", bCD = 10000 } )
 			table.insert(d, { id = 17256, name = "Bite", rank = "3", bCD = 10000 } )
@@ -2276,7 +2276,7 @@ private.GetPetData = function(class)
 			table.insert(d, { id = 26188, name = "Thunderstomp", rank = "3", bCD = 60000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			table.insert(d, { id = 17253, name = "Bite", rank = "1", bCD = 10000 } )
 			table.insert(d, { id = 17255, name = "Bite", rank = "2", bCD = 10000 } )
 			table.insert(d, { id = 17256, name = "Bite", rank = "3", bCD = 10000 } )
@@ -2338,7 +2338,7 @@ private.GetPetData = function(class)
 			table.insert(d, { id = 35346, name = "Warp", rank = "", bCD = 15000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			table.insert(d, { id = 55749, name = "Acid Spit", rank = "1", bCD = 10000 } )
 			table.insert(d, { id = 55750, name = "Acid Spit", rank = "2", bCD = 10000 } )
 			table.insert(d, { id = 55751, name = "Acid Spit", rank = "3", bCD = 10000 } )
@@ -2542,7 +2542,7 @@ private.GetPetData = function(class)
 	-- Warlock
 	if class == "WARLOCK" then
 		-- CLASSIC
-		if tocversion < 20000 then
+		if CDTL2.tocversion < 20000 then
 			table.insert(d, { id = 19505, name = "Devour Magic", rank = "1", bCD = 8000 } )
 			table.insert(d, { id = 19731, name = "Devour Magic", rank = "2", bCD = 8000 } )
 			table.insert(d, { id = 19734, name = "Devour Magic", rank = "3", bCD = 8000 } )
@@ -2572,7 +2572,7 @@ private.GetPetData = function(class)
 			table.insert(d, { id = 11775, name = "Torment", rank = "6", bCD = 5000 } )
 			
 		-- TBC
-		elseif tocversion < 30000 then
+		elseif CDTL2.tocversion < 30000 then
 			table.insert(d, { id = 19505, name = "Devour Magic", rank = "1", bCD = 8000 } )
 			table.insert(d, { id = 19731, name = "Devour Magic", rank = "2", bCD = 8000 } )
 			table.insert(d, { id = 19734, name = "Devour Magic", rank = "3", bCD = 8000 } )
@@ -2609,7 +2609,7 @@ private.GetPetData = function(class)
 			table.insert(d, { id = 27270, name = "Torment", rank = "7", bCD = 5000 } )
 			
 		-- WOTLK
-		elseif tocversion < 40000 then
+		elseif CDTL2.tocversion < 40000 then
 			table.insert(d, { id = 33698, name = "Anguish", rank = "1", bCD = 5000 } )
 			table.insert(d, { id = 33699, name = "Anguish", rank = "2", bCD = 5000 } )
 			table.insert(d, { id = 33700, name = "Anguish", rank = "3", bCD = 5000 } )
@@ -2684,17 +2684,17 @@ end
 
 -- INTERNAL COOLDOWNS
 private.GetICDData = function(trigger)
-	local _, _, _, tocversion = GetBuildInfo()
+	--local _, _, _, tocversion = GetBuildInfo()
 	local d = {}
 	
 	-- CLASSIC
-	if tocversion < 20000 then
+	if CDTL2.tocversion < 20000 then
 		
 	-- TBC
-	elseif tocversion < 30000 then
+	elseif CDTL2.tocversion < 30000 then
 		
 	-- WOTLK
-	elseif tocversion < 40000 then
+	elseif CDTL2.tocversion < 40000 then
 		-- AURA PROCS
 		table.insert(d, { id = 60065, name = "Reflection of Torment", itemID = 44914, itemName = "Anvil of Titans", trigger = "aura", bCD = 50000 } )
 		table.insert(d, { id = 57345, name = "Darkmoon Card: Greatness", itemID = 44253, itemName = "Darkmoon Card: Greatness", trigger = "aura", bCD = 45000 } )
@@ -2736,6 +2736,19 @@ private.GetICDData = function(trigger)
 		table.insert(d, { id = 63250, name = "Jouster's Fury", itemID = 45219, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
 		table.insert(d, { id = 63250, name = "Jouster's Fury", itemID = 45131, itemName = "Jouster's Fury", trigger = "aura", bCD = 50000 } )
 		
+		table.insert(d, { id = 67669, name = "Elusive Power", itemID = 47213, itemName = "Abyssal Rune", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67671, name = "Fury", itemID = 47214, itemName = "Banner of Victory", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 67772, name = "Paragon", itemID = 47464, itemName = "Death's Choice", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67773, name = "Paragon", itemID = 47464, itemName = "Death's Choice", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67703, name = "Paragon", itemID = 47303, itemName = "Death's Choice", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67708, name = "Paragon", itemID = 47303, itemName = "Death's Choice", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67772, name = "Paragon", itemID = 47131, itemName = "Death's Verdict", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67773, name = "Paragon", itemID = 47131, itemName = "Death's Verdict", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67703, name = "Paragon", itemID = 47115, itemName = "Death's Verdict", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67708, name = "Paragon", itemID = 47115, itemName = "Death's Verdict", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67666, name = "Mana Mana", itemID = 47215, itemName = "Tears of the Vanquished", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 67631, name = "Aegis", itemID = 47216, itemName = "The Black Heart", trigger = "aura", bCD = 50000 } )
+		
 		-- SPELL PROCS
 		table.insert(d, { id = 60443, name = "Bandit's Insignia", itemID = 40371, itemName = "Bandit's Insignia", trigger = "spell", bCD = 45000 } )
 		table.insert(d, { id = 60203, name = "Darkmoon Card: Death", itemID = 42990, itemName = "Darkmoon Card: Death", trigger = "spell", bCD = 45000 } )
@@ -2744,6 +2757,11 @@ private.GetICDData = function(trigger)
 		
 		table.insert(d, { id = 60307, name = "Vestige of Haldor", itemID = 37064, itemName = "Vestige of Haldor", trigger = "spell", bCD = 45000 } )
 		table.insert(d, { id = 60483, name = "Pendulum of Telluric Currents", itemID = 37264, itemName = "Pendulum of Telluric Currents", trigger = "spell", bCD = 45000 } )
+		
+		table.insert(d, { id = 69733, name = "Cauterizing Heal", itemID = 49463, itemName = "Purified Shard of the Flame", trigger = "spell", bCD = 50000 } )
+		table.insert(d, { id = 69729, name = "Searing Flames", itemID = 49463, itemName = "Purified Shard of the Flame", trigger = "spell", bCD = 50000 } )
+		table.insert(d, { id = 69734, name = "Cauterizing Heal", itemID = 49464, itemName = "Shiny Shard of the Flame", trigger = "spell", bCD = 50000 } )
+		table.insert(d, { id = 69730, name = "Searing Flames", itemID = 49464, itemName = "Shiny Shard of the Flame", trigger = "spell", bCD = 50000 } )
 	end
 	
 	return d
@@ -2751,17 +2769,17 @@ end
 
 -- INTERNAL COOLDOWNS
 private.GetEnchantICDData = function(trigger)
-	local _, _, _, tocversion = GetBuildInfo()
+	--local _, _, _, tocversion = GetBuildInfo()
 	local d = {}
 	
 	-- CLASSIC
-	if tocversion < 20000 then
+	if CDTL2.tocversion < 20000 then
 		
 	-- TBC
-	elseif tocversion < 30000 then
+	elseif CDTL2.tocversion < 30000 then
 		
 	-- WOTLK
-	elseif tocversion < 40000 then
+	elseif CDTL2.tocversion < 40000 then
 		-- AURA PROCS
 		--table.insert(d, { id = 60065, name = "Reflection of Torment", itemID = 44914, itemName = "Anvil of Titans", trigger = "aura", bCD = 50000 } )
 				

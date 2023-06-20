@@ -1124,7 +1124,12 @@ private.CooldownUpdate = function(f, elapsed)
 							CDTL2:SetSpellData(d["name"], "items", "bCD", duration * 1000)
 						end
 					else
-						local start, duration, enabled = C_Container.GetItemCooldown(d["itemID"])
+						local start, duration, enabled
+						if CDTL2.tocversion < 20000 then
+							start, duration, enabled = GetItemCooldown(d["itemID"])
+						else
+							start, duration, enabled = C_Container.GetItemCooldown(d["itemID"])
+						end
 						
 						d["baseCD"] = duration
 						CDTL2:SetSpellData(d["name"], "items", "bCD", duration * 1000)
@@ -1155,7 +1160,12 @@ private.CooldownUpdate = function(f, elapsed)
 							d["currentCD"] = start + duration - GetTime()
 						end
 					else
-						local start, duration, enabled = C_Container.GetItemCooldown(d["itemID"])
+						local start, duration, enabled
+						if CDTL2.tocversion < 20000 then
+							start, duration, enabled = GetItemCooldown(d["itemID"])
+						else
+							start, duration, enabled = C_Container.GetItemCooldown(d["itemID"])
+						end
 						d["baseCD"] = duration
 						d["currentCD"] = start + duration - GetTime()
 					end

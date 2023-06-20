@@ -1,4 +1,4 @@
-## Interface: 30401
+## Interface: 30402
 ## Title: CooldownTimeline2
 ## Author: cliffclive (Vreenak - REMULOS)
 ## Notes: Track cooldowns as icons along a timeline
