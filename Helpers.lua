@@ -1146,7 +1146,7 @@ function CDTL2:ScanCurrentCooldowns(class, race)
 			if itemID then
 				if CDTL2:IsValidItem(itemID) then
 					local start, duration, enabled
-					if CDTL2.tocversion >= 20000 then
+					if CDTL2.tocversion < 20000 then
 						start, duration, enabled = GetItemCooldown(itemId)
 					else
 						start, duration, enabled = C_Container.GetItemCooldown(itemId)
@@ -1229,7 +1229,7 @@ function CDTL2:ScanCurrentCooldowns(class, race)
 				if itemID then
 					if CDTL2:IsValidItem(itemId) then
 						local start, duration, enabled
-						if CDTL2.tocversion >= 20000 then
+						if CDTL2.tocversion < 20000 then
 							start, duration, enabled = GetItemCooldown(itemId)
 						else
 							start, duration, enabled = C_Container.GetItemCooldown(itemId)

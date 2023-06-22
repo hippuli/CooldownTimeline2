@@ -18,6 +18,9 @@ private.GetChangelog = function()
 	changeLog = changeLog.."  - Fixed and event error in Classic Era\n"
 	changeLog = changeLog.."  - Fixed item use issues in Classic Era\n"
 	changeLog = changeLog.."\n"
+	changeLog = changeLog.."Changelog 1.10r1:\n\n"
+	changeLog = changeLog.."  - Fixed an issue with item cooldowns that would cause an error (thanks again MrFIXIT)\n"
+	changeLog = changeLog.."\n"
 		
 	return changeLog
 end
