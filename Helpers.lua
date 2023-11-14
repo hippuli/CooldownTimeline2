@@ -647,20 +647,20 @@ function CDTL2:GetItemSpell(id)
 	-- INVENTORY
 	for i = 0, 4, 1 do
 		local numberOfSlots = 0
-		if CDTL2.tocversion < 20000 then
+		--[[if CDTL2.tocversion < 20000 then
 			numberOfSlots = GetContainerNumSlots(i)
 		else
 			numberOfSlots = C_Container.GetContainerNumSlots(i)
-		end
-		--local numberOfSlots = C_Container.GetContainerNumSlots(i)
+		end]]--
+		local numberOfSlots = C_Container.GetContainerNumSlots(i)
 		for x = 0, numberOfSlots, 1 do
-			local itemId = 0
-			if CDTL2.tocversion < 20000 then
+			--local itemId = 0
+			--[[if CDTL2.tocversion < 20000 then
 				itemId = GetContainerItemID(i, x)
 			else
 				itemId = C_Container.GetContainerItemID(i, x)
-			end	
-			--local itemId = C_Container.GetContainerItemID(i, x)
+			end	]]--
+			local itemId = C_Container.GetContainerItemID(i, x)
 			local spellName, spellID = GetItemSpell(itemId)
 			
 			if spellID == id then				
@@ -1145,13 +1145,13 @@ function CDTL2:ScanCurrentCooldowns(class, race)
 		if spellName then
 			if itemID then
 				if CDTL2:IsValidItem(itemID) then
-					local start, duration, enabled
+					--[[local start, duration, enabled
 					if CDTL2.tocversion < 20000 then
 						start, duration, enabled = GetItemCooldown(itemId)
 					else
 						start, duration, enabled = C_Container.GetItemCooldown(itemId)
-					end
-					--local start, duration, enabled = C_Container.GetItemCooldown(itemId)
+					end]]
+					local start, duration, enabled = C_Container.GetItemCooldown(itemId)
 					
 					if duration > 1.5 then
 						if CDTL2:GetExistingCooldown(spellName, "items") then
@@ -1208,33 +1208,33 @@ function CDTL2:ScanCurrentCooldowns(class, race)
 	
 	-- ITEMS BAGS
 	for i = 0, 4, 1 do
-		local numberOfSlots = 0
-		if CDTL2.tocversion < 20000 then
+		--local numberOfSlots = 0
+		--[[if CDTL2.tocversion < 20000 then
 			numberOfSlots = GetContainerNumSlots(i)
 		else
 			numberOfSlots = C_Container.GetContainerNumSlots(i)
-		end
-		--local numberOfSlots = C_Container.GetContainerNumSlots(i)
+		end]]--
+		local numberOfSlots = C_Container.GetContainerNumSlots(i)
 		for x = 0, numberOfSlots, 1 do
-			local itemId = 0
-			if CDTL2.tocversion < 20000 then
+			--local itemId = 0
+			--[[if CDTL2.tocversion < 20000 then
 				itemId = GetContainerItemID(i, x)
 			else
 				itemId = C_Container.GetContainerItemID(i, x)
-			end	
-			--local itemId = C_Container.GetContainerItemID(i, x)
+			end	]]--
+			local itemId = C_Container.GetContainerItemID(i, x)
 			local spellName, spellID = GetItemSpell(itemId)
 			
 			if spellName then
 				if itemID then
 					if CDTL2:IsValidItem(itemId) then
-						local start, duration, enabled
-						if CDTL2.tocversion < 20000 then
+						--local start, duration, enabled
+						--[[if CDTL2.tocversion < 20000 then
 							start, duration, enabled = GetItemCooldown(itemId)
 						else
 							start, duration, enabled = C_Container.GetItemCooldown(itemId)
-						end
-						--local start, duration, enabled = C_Container.GetItemCooldown(itemId)
+						end]]--
+						local start, duration, enabled = C_Container.GetItemCooldown(itemId)
 						
 						if duration > 1.5 then
 							if CDTL2:GetExistingCooldown(spellName, "items") then

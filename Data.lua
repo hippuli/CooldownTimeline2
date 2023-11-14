@@ -534,6 +534,8 @@ private.GetClassData = function(class)
 			table.insert(d, { id = 1510, name = "Volley", rank = "1", bCD = 60000 } )
 			table.insert(d, { id = 14294, name = "Volley", rank = "2", bCD = 60000 } )
 			table.insert(d, { id = 14295, name = "Volley", rank = "3", bCD = 60000 } )
+
+			table.insert(d, { id = 425777, name = "Trap Launcher: Explosive Trap", rank = "1", bCD = 30000 } )
 		
 			-- TALENTS
 			table.insert(d, { id = 19434, name = "Aimed Shot", rank = "1", bCD = 6000 } )
@@ -2748,6 +2750,31 @@ private.GetICDData = function(trigger)
 		table.insert(d, { id = 67708, name = "Paragon", itemID = 47115, itemName = "Death's Verdict", trigger = "aura", bCD = 45000 } )
 		table.insert(d, { id = 67666, name = "Mana Mana", itemID = 47215, itemName = "Tears of the Vanquished", trigger = "aura", bCD = 45000 } )
 		table.insert(d, { id = 67631, name = "Aegis", itemID = 47216, itemName = "The Black Heart", trigger = "aura", bCD = 50000 } )
+
+		table.insert(d, { id = 71639, name = "Thick Skin", itemID = 50349, itemName = "Corpse Tongue Coin", trigger = "aura", bCD = 30000 } )
+		table.insert(d, { id = 71633, name = "Thick Skin", itemID = 50352, itemName = "Corpse Tongue Coin", trigger = "aura", bCD = 30000 } )
+		table.insert(d, { id = 71644, name = "Surge of Power", itemID = 50348, itemName = "Dislodged Foreign Object", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 71601, name = "Surge of Power", itemID = 50353, itemName = "Dislodged Foreign Object", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 71403, name = "Fatal Flaws", itemID = 50198, itemName = "Needle-Encrusted Scorpion", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 71636, name = "Siphoned Power", itemID = 50365, itemName = "Phylactery of the Nameless Lich", trigger = "aura", bCD = 100000 } )
+		table.insert(d, { id = 71605, name = "Siphoned Power", itemID = 50360, itemName = "Phylactery of the Nameless Lich", trigger = "aura", bCD = 100000 } )
+		table.insert(d, { id = 71584, name = "Revitalized", itemID = 50358, itemName = "Purified Lunar Dust", trigger = "aura", bCD = 50000 } )
+		table.insert(d, { id = 71541, name = "Icy Rage", itemID = 50343, itemName = "Whispering Fanged Skull", trigger = "aura", bCD = 45000 } )
+		table.insert(d, { id = 71401, name = "Icy Rage", itemID = 50342, itemName = "Whispering Fanged Skull", trigger = "aura", bCD = 45000 } )
+
+		table.insert(d, { id = 71556, name = "Agility of the Vrykul", itemID = 50363, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71559, name = "Aim of the Iron Dwarves", itemID = 50363, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71558, name = "Power of the Taunka", itemID = 50363, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71557, name = "Precision of the Iron Dwarves", itemID = 50363, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71560, name = "Speed of the Vrykul", itemID = 50363, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71561, name = "Strength of the Taunka", itemID = 50363, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+
+		table.insert(d, { id = 71485, name = "Agility of the Vrykul", itemID = 50362, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71491, name = "Aim of the Iron Dwarves", itemID = 50362, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71486, name = "Power of the Taunka", itemID = 50362, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71487, name = "Precision of the Iron Dwarves", itemID = 50362, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71492, name = "Speed of the Vrykul", itemID = 50362, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
+		table.insert(d, { id = 71484, name = "Strength of the Taunka", itemID = 50362, itemName = "Deathbringer's Will", trigger = "aura", bCD = 105000 } )
 		
 		-- SPELL PROCS
 		table.insert(d, { id = 60443, name = "Bandit's Insignia", itemID = 40371, itemName = "Bandit's Insignia", trigger = "spell", bCD = 45000 } )
@@ -2762,6 +2789,9 @@ private.GetICDData = function(trigger)
 		table.insert(d, { id = 69729, name = "Searing Flames", itemID = 49463, itemName = "Purified Shard of the Flame", trigger = "spell", bCD = 50000 } )
 		table.insert(d, { id = 69734, name = "Cauterizing Heal", itemID = 49464, itemName = "Shiny Shard of the Flame", trigger = "spell", bCD = 50000 } )
 		table.insert(d, { id = 69730, name = "Searing Flames", itemID = 49464, itemName = "Shiny Shard of the Flame", trigger = "spell", bCD = 50000 } )
+
+		table.insert(d, { id = 71641, name = "Echoes of Light", itemID = 50366, itemName = "Althor's Abacus", trigger = "spell", bCD = 45000 } )
+		table.insert(d, { id = 71610, name = "Echoes of Light", itemID = 50359, itemName = "Althor's Abacus", trigger = "spell", bCD = 45000 } )
 	end
 	
 	return d

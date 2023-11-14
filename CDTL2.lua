@@ -13,7 +13,7 @@ CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 local _, _, _, tocversion = GetBuildInfo()
 CDTL2.tocversion = tocversion
 
-CDTL2.version = 1.10
+CDTL2.version = 1.11
 CDTL2.noticeVersion = 1.8
 CDTL2.cdUID = 999
 CDTL2.lanes = {}
@@ -2108,7 +2108,8 @@ function CDTL2:OnEnable()
 	
 	local vMajor = 0
 	local vMinor = 0
-	if CDTL2.db.profile.global["firstRun"] or CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
+	--if CDTL2.db.profile.global["firstRun"] or CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
+	if CDTL2.db.profile.global["firstRun"] or IsNewerVersion() then
 		C_Timer.After(10, function()
 			private.CreateFirstRunFrame()
 		end)
@@ -2211,6 +2212,10 @@ private.CreateDebugFrame = function()
 		--for _, spell in pairs(CDTL2.spellData) do
 			--CDTL2:Print("SPELL DATA: "..spell["id"].." - "..spell["name"].." - "..spell["rank"])
 		--end
+
+		print(CDTL2.noticeVersion)
+		print(CDTL2.db.profile.global["previousVersion"])
+		print(IsNewerVersion())
 	end)
 		
 	local b = CreateFrame("Button", frameName.."_B_TestCode2", f, "UIPanelButtonTemplate", BackdropTemplateMixin and "BackdropTemplate" or nil)
@@ -2273,7 +2278,8 @@ private.CreateFirstRunFrame = function()
 		text = text.."Old settings are still saved, and you can manually\uninstall old versions"
 	end
 	
-	if CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
+	--if CDTL2.db.profile.global["previousVersion"] < CDTL2.noticeVersion then
+	if IsNewerVersion() then
 		text = text.."\n\n\n"
 		text = text.."This new version changes how items are.\n"
 		text = text.."detected/displayed(in Filters).  This should\n"
@@ -3259,4 +3265,29 @@ function CDTL2:TurnOff()
 		
 		CDTL2.enabled = false
 	end
+end
+
+function IsNewerVersion()
+	local nv = tostring(CDTL2.noticeVersion)
+	local pv = tostring(CDTL2.db.profile.global["previousVersion"])
+
+	local nv1, nv2 = nv:match("([^%.]*)%.?(.*)")
+	nv1 = tonumber(nv1)
+	nv2 = tonumber(nv2)
+
+	local pv1, pv2 = pv:match("([^%.]*)%.?(.*)")
+	pv1 = tonumber(pv1)
+	pv2 = tonumber(pv2)
+
+	if pv1 < nv1 then
+		return true
+	else
+		if pv1 == nv1 then
+			if pv2 < nv2 then
+				return true
+			end
+		end
+	end
+
+	return false
 end

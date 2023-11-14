@@ -1163,11 +1163,13 @@ private.CooldownUpdate = function(f, elapsed)
 						local start, duration, enabled
 						if CDTL2.tocversion < 20000 then
 							start, duration, enabled = GetItemCooldown(d["itemID"])
+							d["baseCD"] = duration
+							d["currentCD"] = start + duration - GetTime()
 						else
 							start, duration, enabled = C_Container.GetItemCooldown(d["itemID"])
+							d["baseCD"] = duration
+							d["currentCD"] = start + duration - GetTime()
 						end
-						d["baseCD"] = duration
-						d["currentCD"] = start + duration - GetTime()
 					end
 				end
 			end
