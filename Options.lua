@@ -12,14 +12,10 @@ private.GetChangelog = function()
 	changeLog = changeLog.."Version 1 settings are saved independent of version 2, so you can manually install and use old versions if you wish\n"
 	changeLog = changeLog.."This also means version 1 settings will not roll over into version 2\n\n"
 	changeLog = changeLog.."\n"
-	changeLog = changeLog.."Changelog 1.11:\n\n"
-	changeLog = changeLog.."  - Fixed (hopefully) an issue to cause the welcome message to constantly show when it shouldnt\n"
-	changeLog = changeLog.."  - Fixed (hopefully) the 'CooldownTimeline2/Cooldown.lua:1170' error\n"
-	changeLog = changeLog.."  - Fixed 'GetContainerNumSlots' error in Classic\n"
-	changeLog = changeLog.."  - Updated Ace3 and LibSharedMedia libraries\n"
-	changeLog = changeLog.."  - Updated for the phase 4 content patch\n"
-	changeLog = changeLog.."  - Added ICD data for phase 4 trinkets\n"
-	changeLog = changeLog.."  - Added Trap Launcher: Explosive Trap cooldown data\n"
+	changeLog = changeLog.."Changelog 1.12:\n\n"
+	changeLog = changeLog.."  - Fixed (again, and again hopefully) the 'CooldownTimeline2/Cooldown.lua:1170' error\n"
+	changeLog = changeLog.."  - Fixed an error in Classic Era that would appear when using items (thanks Catmemes)\n"
+	changeLog = changeLog.."  - Creating a discord to get quicker and easier feedback.\n"
 	changeLog = changeLog.."\n"
 		
 	return changeLog
@@ -644,12 +640,29 @@ function CDTL2:GetMainOptions()
 						type = "description",
 						order = 100,
 					},
-					spacer200 = {
+					cdtl2discord = {
+						type = "input",
+						name = "Discord",
+						--desc = "Tooltip",
+						arg = "",
+						get = function(info)
+							return CDTL2.discordlink
+						end,
+						set = function(info)
+							return nil
+						end,
+						order = 1,
+						width = "full",
+						disabled = false,
+						dialogControl = "SFX-Info-URL",
+						order = 200,
+					 },
+					spacer300 = {
 						name = function(info)
 							return private.GetChangelog()
 						end,
 						type = "description",
-						order = 200,
+						order = 300,
 					},
 				},
 			},

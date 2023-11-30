@@ -13,9 +13,10 @@ CDTL2.LSM = LibStub("LibSharedMedia-3.0")
 local _, _, _, tocversion = GetBuildInfo()
 CDTL2.tocversion = tocversion
 
-CDTL2.version = 1.11
+CDTL2.version = 1.12
 CDTL2.noticeVersion = 1.8
 CDTL2.cdUID = 999
+CDTL2.discordlink = "https://discord.gg/4s6xUSq3qQ"
 CDTL2.lanes = {}
 CDTL2.barFrames = {}
 CDTL2.readyFrames = {}

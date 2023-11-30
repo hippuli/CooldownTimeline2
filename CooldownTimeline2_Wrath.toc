@@ -2,7 +2,7 @@
 ## Title: CooldownTimeline2
 ## Author: cliffclive (Vreenak - REMULOS)
 ## Notes: Track cooldowns as icons along a timeline
-## Version: 2.0.1.11
+## Version: 2.0.1.12
 ## SavedVariables: CDTL2DB
 ## OptionalDeps: Masque
 
